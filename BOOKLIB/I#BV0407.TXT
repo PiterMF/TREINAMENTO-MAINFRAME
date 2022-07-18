@@ -1,0 +1,10 @@
+       01 WRK-SVSA0407.                                                 00010000
+          05 WRK-CABECALHO.                                             00020000
+             10 WRK-SVSA0407-DADOS-BOOK    PIC X(08) VALUE 'I#BV0407'.  00030000
+             10 WRK-SVA0407-DADOS-LEN      PIC 9(03) VALUE 19.          00040000
+          05 WRK-CORPO.                                                 00050000
+             10 WRK-SVSA0407-DADOS-CHAVE.                               00060000
+                15 WRK-SVSA0407-DADOS-AGENCIA PIC X(04).                00070000
+                15 WRK-SVSA0407-DADOS-CONTA   PIC X(05).                00080000
+             10 WRK-SVSA0407-DADOS-SALARIO    PIC X(10).                00090000
+             10 WRK-SVSA0407-DADOS-DATA-GRAV  PIC X(08).                00100001

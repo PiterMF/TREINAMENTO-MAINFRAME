@@ -1,0 +1,7 @@
+//FOUR018X JOB 'COMP CO',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01)  00010000
+//EXECUTAR EXEC PGM=FR18RELB                                            00140003
+//STEPLIB  DD   DSN=GR.GERAL.LOADLIB,DISP=SHR                           00220001
+//SRELBENE DD   DSN=GR.FOUR018.SRELBENE,DISP=SHR                        00220105
+//RELBFR18 DD   DSN=GR.FOUR018.RELBFR18,DISP=OLD                        00221005
+//SYSIN    DD   *                                                       00230004
+007                                                                     00240008

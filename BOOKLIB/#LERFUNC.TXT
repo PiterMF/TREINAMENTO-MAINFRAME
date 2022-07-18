@@ -1,0 +1,5 @@
+       01 FD-FUNC.                                                      00010001
+          05 FD-IDFUNC    PIC X(05).                                    00020002
+          05 FD-NOMEFUNC  PIC X(30).                                    00030001
+          05 FD-SETORFUNC PIC X(04).                                    00040001
+          05 FD-SALFUNC   PIC 9(06).                                    00050001

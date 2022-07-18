@@ -1,0 +1,9 @@
+       01 FD-MOV0106.
+          05 FD-MV-CHAVE.
+             10 FD-MV-AGENCIA   PIC X(04).
+             10 FD-MV-CONTA     PIC X(04).
+          05 FD-MV-MOVIMENTO    PIC X(30).
+          05 FD-MV-VALORMOV     PIC 9(08).
+          05 FD-MV-TIPOMOV      PIC X(01).
+             88 FD-MV-TIPOMOV-D     VALUE 'D'.
+             88 FD-MV-TIPOMOV-C     VALUE 'C'.

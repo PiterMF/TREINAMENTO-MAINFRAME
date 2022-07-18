@@ -1,0 +1,27 @@
+       01 WRK-DATA.                                                     00010000
+          05 WRK-ANO PIC 9(04).                                         00020000
+          05 WRK-MES PIC 9(02).                                         00030000
+          05 WRK-DIA PIC 9(02).                                         00040000
+                                                                        00050000
+       01 WRK-DATA-ED.                                                  00060000
+          05 WRK-DIA PIC 9(02).                                         00070000
+          05 FILLER  PIC X(01) VALUE '/'.                               00080000
+          05 WRK-MES PIC 9(02).                                         00090000
+          05 FILLER  PIC X(01) VALUE '/'.                               00100000
+          05 WRK-ANO PIC 9(04).                                         00110000
+                                                                        00120000
+       01 WRK-HORA.                                                     00130000
+          05 WRK-HH PIC 9(02).                                          00140000
+          05 WRK-MM PIC 9(02).                                          00150000
+          05 WRK-SS PIC 9(02).                                          00160000
+                                                                        00170000
+       01 WRK-HORA-ED.                                                  00180000
+          05 WRK-HH PIC 9(02).                                          00190000
+          05 FILLER PIC X(01) VALUE ':'.                                00200000
+          05 WRK-MM PIC 9(02).                                          00210000
+          05 FILLER PIC X(01) VALUE ':'.                                00220000
+          05 WRK-SS PIC 9(02).                                          00230000
+                                                                        00240000
+       01 WRK-DATA-HORA-DISP.                                           00250000
+          05 WRK-DATA-DISP PIC X(06) VALUE 'DATA: '.                    00260000
+          05 WRK-HORA-DISP PIC X(06) VALUE 'HORA: '.                    00270000

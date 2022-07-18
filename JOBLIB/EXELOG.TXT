@@ -1,0 +1,6 @@
+//FOUR018X JOB 'EXEC COB',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01) 00010000
+//EXECUTAR EXEC PGM=ARQ1804                                             00020003
+//STEPLIB  DD DSN=PR.FOUR018.OBJ,DISP=SHR                               00030000
+//ALUNOS   DD DSN=PR.FOUR018.ALUNOS,DISP=OLD                            00040012
+//RELREC   DD SYSOUT=*                                                  00041012
+//LOGERROS DD DSN=PR.FOUR018.LOGERROS,DISP=OLD                          00050007

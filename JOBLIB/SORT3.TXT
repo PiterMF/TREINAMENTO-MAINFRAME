@@ -1,0 +1,14 @@
+//FOUR018X JOB 'SORT 03',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01)  00010000
+//STEP01   EXEC PGM=SORT                                                00020000
+//SORTIN   DD   DSN=GR.FOUR018.MASSASRT,DISP=SHR                        00030000
+//SORTOUT  DD   SYSOUT=*                                                00040000
+//SYSOUT   DD   SYSOUT=*                                                00050000
+//*-------------------------------------------------------              00051003
+//*AAAACCCCCNNNNNNNNNNNNNNNNNNNNSSSSSSSS                                00052003
+//*OUTREC FIELDS=(C'AGENCIA: ',01,04,2X,C'CONTA: ',05,05,2X,            00052106
+//*               C'SALDO: ',34,08)                                     00052206
+//*-------------------------------------------------------              00053003
+//SYSIN    DD   *                                                       00055000
+  SORT FIELDS=COPY                                                      00056001
+  OUTREC FIELDS=(C'CONTA: ',05,05,2X,C'AGENCIA: ',01,04,2X,             00060006
+                 C'SALDO: ',34,08)                                      00070006

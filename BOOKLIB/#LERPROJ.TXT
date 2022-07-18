@@ -1,0 +1,4 @@
+       01 FD-PROJ.                                                      00010000
+          05 FD-PROJ-IDFUNC  PIC X(05).                                 00020000
+          05 FD-PROJ-PROJETO PIC X(20).                                 00030000
+          05 FD-PROJ-QTHORAS PIC 9(03).                                 00040000

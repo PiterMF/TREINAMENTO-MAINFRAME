@@ -1,0 +1,6 @@
+//FOUR018X JOB 'COMPVSAM',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01) 00010001
+//EXECUTAR EXEC PGM=FR18LVSA                                            00140000
+//STEPLIB  DD   DSN=GR.GERAL.LOADLIB,DISP=SHR                           00220000
+//ARQVSAM  DD   DSN=GR.FOUR018.ARQVSAM.KSDS,DISP=SHR                    00220100
+//SYSIN    DD   *                                                       00230000
+00018                                                                   00240000

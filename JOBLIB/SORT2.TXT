@@ -1,0 +1,17 @@
+//FOUR018X JOB 'SORT 01',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01)  00010001
+//STEP01   EXEC PGM=SORT                                                00020001
+//SORTIN   DD   *                                                       00030001
+JONAS@GMAIL.COM     2222222222222                                       00031001
+CARLA@GMAIL.COM     3333333333333                                       00032001
+PAULO@GMAIL.COM     4444444444444                                       00033001
+JONAS@GMAIL.COM     1111111111111                                       00034001
+HEIDI@GMAIL.COM     1818181818181                                       00035001
+//SORTOUT  DD   SYSOUT=*                                                00040001
+//SYSOUT   DD   SYSOUT=*                                                00050001
+//*-- SORT SIMPLES  1 CHAVE  SORT FIELDS=(01,04,CH,A)                   00051001
+//*-- SORT COMPOSTO 2 CHAVES SORT FIELDS=(01,04,CH,A,10,20,CH,A)        00052001
+//*-- SORT COMPOSTO 2 CHAVES SORT FIELDS=(01,04,A,10,20,A),FORMAT=CH    00053001
+//*SORT FIELDS=(01,09,CH,A)                                             00054001
+//SYSIN    DD   *                                                       00055001
+  SORT FIELDS=(01,20,CH,A)                                              00056001
+  SUM  FIELDS=NONE                                                      00057001

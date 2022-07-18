@@ -1,0 +1,25 @@
+//FOUR018X JOB 'EXEC COB',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01) 00010000
+//STEP01   EXEC PGM=SORT                                                00011000
+//SORTIN   DD DSN=PR.FOUR018.CLIENTES,DISP=SHR                          00012000
+//SORTOUT  DD DSN=PR.FOUR018.CLIENTES,DISP=OLD                          00013000
+//SYSOUT   DD SYSOUT=*                                                  00014000
+//SYSIN    DD *                                                         00015000
+ SORT FIELDS=(01,10,CH,A)                                               00016000
+//*----------------------------                                         00017000
+//STEP02   EXEC PGM=SORT                                                00018000
+//SORTIN   DD DSN=PR.FOUR018.MOV0106,DISP=SHR                           00018100
+//SORTOUT  DD DSN=PR.FOUR018.MOV0106,DISP=OLD                           00018200
+//SYSOUT   DD SYSOUT=*                                                  00018300
+//SYSIN    DD *                                                         00018400
+ SORT FIELDS=(01,08,CH,A,47,01,CH,A)                                    00018505
+//*----------------------------                                         00018600
+//*EXECUTAR FR18EX04                                                    00018700
+//*----------------------------                                         00018800
+//STEP03   EXEC PGM=FR18EX04                                            00018901
+//STEPLIB  DD DSN=PR.FOUR018.OBJ,DISP=SHR                               00019000
+//CLIENTES DD DSN=PR.FOUR018.CLIENTES,DISP=SHR                          00020002
+//MOV0106  DD DSN=PR.FOUR018.MOV0106,DISP=SHR                           00030002
+//LOGERROS DD DSN=PR.FOUR018.LOGERROS,DISP=OLD                          00040000
+//MOV0106A DD SYSOUT=*                                                  00042002
+//MOV0106C DD SYSOUT=*                                                  00042100
+//SYSIN    DD *                                                         00042500

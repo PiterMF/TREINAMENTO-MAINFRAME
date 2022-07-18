@@ -1,0 +1,22 @@
+//FOUR018X JOB 'SORT 04',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01)  00010000
+//STEP01   EXEC PGM=SORT                                                00020000
+//*-------------------------------------------------------              00021002
+//*INREC FIELDS=(10,19,X,C'SALDO',X,34,08,C'------')                    00023005
+//*SORT FIELDS=COPY                                                     00024002
+//*OUTREC FIELDS=(10,19,X,C'SALDO',X,34,08,C'------')                   00024102
+//*OUTREC FIELDS=(SEQNUM,5,ZD,START=1,INCR=2,01,25)                     00024205
+//*01-20=NOME 21-04=DEPTO 25=(C)CLT/(E)ESTAGIO                          00026002
+//*-------------------------------------------------------              00027002
+//SORTIN   DD   *                                                       00030002
+PITER FANTI         DPTIC                                               00031002
+HEIDI C PIVA        DPSPE                                               00032002
+RAFAEL VIANA        DPTIC                                               00033002
+LEONARDO SOUZA      DPSPE                                               00034002
+DANTE ALIGHIERI     ADMIC                                               00035002
+KENAN ROCKMORE      ADMIE                                               00036002
+ARNOLD ROCKEMBORE   ADMIC                                               00037002
+//SORTOUT  DD   SYSOUT=*                                                00040000
+//SYSOUT   DD   SYSOUT=*                                                00050000
+//SYSIN    DD   *                                                       00052602
+  SORT FIELDS=(25,01,CH,A)                                              00052707
+  OUTREC FIELDS=(01,25,SEQNUM,5,ZD,RESTART=(25,1))                      00052905

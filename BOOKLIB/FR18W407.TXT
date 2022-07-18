@@ -1,0 +1,5 @@
+       01 FD-EVSA0407.                                                  00001001
+          05 FD-EVSA-CHAVE.                                             00020003
+             10 FD-EVSA-AGENCIA PIC X(04).                              00030003
+             10 FD-EVSA-CONTA   PIC X(05).                              00040003
+          05 FD-EVSA-SALARIO    PIC X(10).                              00050003

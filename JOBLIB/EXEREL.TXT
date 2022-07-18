@@ -1,0 +1,21 @@
+//FOUR018X JOB 'EXEC COB',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID,TIME=(0,01) 00010000
+//STEP01   EXEC PGM=SORT                                                00011007
+//SORTIN   DD DSN=PR.FOUR018.FUNC,DISP=SHR                              00012007
+//SORTOUT  DD DSN=PR.FOUR018.FUNC,DISP=OLD                              00013007
+//SYSOUT   DD SYSOUT=*                                                  00014008
+//SYSIN    DD *                                                         00015008
+ SORT FIELDS=(36,04,CH,A)                                               00016008
+//*----------------------------                                         00017008
+//*EXECUTAR RELFUNC (REL1805)                                           00018009
+//*----------------------------                                         00019008
+//STEP02   EXEC PGM=REL1805                                             00020009
+//STEPLIB  DD DSN=PR.FOUR018.OBJ,DISP=SHR                               00030000
+//FUNC     DD DSN=PR.FOUR018.FUNC,DISP=SHR                              00040016
+//LOGERROS DD DSN=PR.FOUR018.LOGERROS,DISP=OLD                          00042000
+//RELAT    DD DSN=PR.FOUR018.RELAT,DISP=OLD                             00042116
+//*RELAT    DD SYSOUT=*                                                 00042213
+//*RELAT    DD DSN=PR.FOUR018.RELAT,DISP=(NEW,CATLG,DELETE),            00043012
+//*         SPACE=(TRK,(1,1)),                                          00043112
+//*         DCB=(RECFM=FB,LRECL=59,BLKSIZE=0)                           00043212
+//SYSIN    DD *                                                         00044010
+013                                                                     00045017
