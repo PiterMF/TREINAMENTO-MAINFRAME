@@ -1,0 +1,302 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00031000
+       PROGRAM-ID. REL1805.                                             00032000
+                                                                        00033000
+      *======================================================*          00034035
+      *  PROGRAMADOR: PITER FANTI                            *          00035035
+      *  ANALISTA   : IVAN SANCHES                           *          00035135
+      *  EMPRESA    : FOURSYS                                *          00036035
+      *  DATA       : 27/05/2022                             *          00036135
+      *------------------------------------------------------*          00037035
+      *  OBJETIVO   : LER TODOS OS FUNCIONARIOS DO REGISTRO  *          00039035
+      *               (PR.FOUR018.FUNC) SEPARANDO POR        *          00039135
+      *               SETOR E SOMANDO OS SALARIOS IMPRIMINDO *          00040035
+      *               UM RELATORIO COM ESSES DADOS E MANDADO *          00041035
+      *               PARA A SYSOUT O TOTAL DE SALARIOS GERAL*          00042035
+      *               E TOTAL DE REGISTROS LIDOS             *          00043035
+      *------------------------------------------------------*          00043135
+      *  ARQUIVOS   :                                        *          00044035
+      *   DDNAME          I/O                INCLUDE/BOOK    *          00045035
+      *   EFUNC            I                   #LERFUNC      *          00046035
+      *   SRELAT           O                       -         *          00047035
+      *------------------------------------------------------*          00048035
+      *  MODULOS    :                             BOOK       *          00049035
+      *   GRAVALOG    - TRATAMENTO DE ERROS     (#GLOGPT)    *          00049135
+      *======================================================*          00050035
+                                                                        00060000
+      *====================================================             00070000
+       ENVIRONMENT                               DIVISION.              00080000
+      *====================================================             00090000
+       INPUT-OUTPUT                              SECTION.               00100000
+       FILE-CONTROL.                                                    00110000
+           SELECT FUNC ASSIGN TO FUNC                                   00120000
+               FILE STATUS IS WRK-FS-FUNC.                              00130000
+                                                                        00140000
+           SELECT RELAT ASSIGN TO RELAT                                 00140218
+               FILE STATUS IS WRK-FS-RELAT.                             00140318
+                                                                        00140418
+      *====================================================             00141000
+       DATA                                      DIVISION.              00142000
+      *====================================================             00143000
+       FILE                                    SECTION.                 00144000
+       FD FUNC                                                          00145000
+           RECORDING MODE IS F                                          00146000
+           LABEL RECORD IS STANDARD                                     00147000
+           BLOCK CONTAINS 0 RECORDS.                                    00148000
+                                                                        00149000
+      *-------LRECL-29----------                                        00150000
+           COPY '#LERFUNC'.                                             00151034
+                                                                        00164118
+       FD RELAT                                                         00164218
+           RECORDING MODE IS F                                          00164318
+           LABEL RECORD IS STANDARD                                     00164418
+           BLOCK CONTAINS 0 RECORDS.                                    00164518
+                                                                        00164618
+       01 FD-RELAT PIC X(58).                                           00164718
+                                                                        00165000
+      *----------------------------------------------------             00166000
+       WORKING-STORAGE                         SECTION.                 00167000
+      *----------------------------------------------------             00168000
+      *---DADOS-DA-VARIAVEL-LIDA---------------                         00169035
+       01 WRK-FUNC.                                                     00170000
+          05 WRK-IDFUNC    PIC 9(05).                                   00180000
+          05 FILLER        PIC X(04).                                   00181000
+          05 WRK-NOMEFUNC  PIC X(30).                                   00182000
+          05 WRK-SETORFUNC PIC X(04).                                   00183000
+          05 FILLER        PIC X(08).                                   00184000
+          05 WRK-SALFUNC   PIC 9(06).                                   00185000
+                                                                        00186000
+      *----HEADLINE:-TAMANHO-DA-LINHA-58                                00187035
+       01 WRK-CABEC.                                                    00187100
+          05 WRK-CABEC1.                                                00187200
+             10 FILLER  PIC X(12).                                      00187300
+             10 FILLER  PIC X(37) VALUE                                 00187400
+             'RELATORIO DE FUNCIONARIOS      PAG: '.                    00187500
+             10 WRK-PAG PIC 9(02) VALUE 1.                              00187600
+             10 FILLER  PIC X(07).                                      00187700
+          05 WRK-CABEC2.                                                00187800
+             10 FILLER  PIC X(09) VALUE 'ID       '.                    00187900
+             10 FILLER  PIC X(04) VALUE 'NOME'.                         00188000
+             10 FILLER  PIC X(26).                                      00188100
+             10 FILLER  PIC X(12) VALUE 'SETOR       '.                 00188200
+             10 FILLER  PIC X(07) VALUE 'SALARIO'.                      00188300
+             10 FILLER  PIC X(01).                                      00188400
+                                                                        00188500
+           COPY '#GLOGPT'.                                              00188618
+                                                                        00188718
+      *-------SOMA-SALARIOS---------------------------                  00188835
+       01 WRK-SOMA-SALARIO.                                             00188918
+          05 FILLER PIC X(29) VALUE 'SOMA DE SALARIOS DO SETOR..: '.    00189019
+          05 WRK-SOMASET PIC 9(08) VALUE ZEROES.                        00189219
+                                                                        00189318
+      *-------SOMA-TOTAL-E-REGISTROS-LIDOS------------                  00189435
+       01 WRK-FINAL-REL.                                                00189519
+          05 WRK-FINAL-SALTOT.                                          00189619
+             10 FILLER PIC X(24) VALUE 'SOMA TOTAL DE SALARIOS: '.      00189719
+             10 WRK-SOMATOT PIC 9(08) VALUE ZEROES.                     00189819
+          05 WRK-TOT-FUNC.                                              00189919
+             10 FILLER PIC X(21) VALUE 'REGISTROS LIDOS....: '.         00190020
+             10 WRK-CONTFUNC PIC 9(02)      VALUE ZEROES.               00190119
+          05 WRK-FIM-REL.                                               00190219
+             10 FILLER PIC X(40) VALUE                                  00190320
+                  '-----------FINAL DO RELATORIO-----------'.           00190419
+                                                                        00190518
+      *-------CONTADORES,-STATUS-E-FORMATACAO--------                   00190634
+       77 WRK-FS-FUNC   PIC 9(02).                                      00190726
+       77 WRK-FS-RELAT  PIC 9(02).                                      00190826
+       77 WRK-LINHA     PIC 9(02)      VALUE 1.                         00190926
+       77 WRK-LINBRANC  PIC X(58)      VALUE SPACES.                    00191026
+       77 WRK-TAM-FOLHA PIC 9(03).                                      00191126
+                                                                        00191200
+      *-------CONTROLADOR-DE-SETOR--------------------                  00191300
+       77 WRK-SET-AT PIC X(04).                                         00191401
+                                                                        00191518
+      *-------LOG-DE-ERROS----------------------------                  00191618
+       77 WRK-GRAVALOG PIC X(08) VALUE 'GRAVALOG'.                      00191718
+                                                                        00191818
+      *====================================================             00191900
+       PROCEDURE                                 DIVISION.              00192000
+      *====================================================             00192100
+                                                                        00192200
+      *----------------------------------------------------             00192300
+       0000-PRINCIPAL                            SECTION.               00192400
+      *----------------------------------------------------             00192500
+           PERFORM 1000-INICIAR.                                        00192600
+           PERFORM 2000-TESTE-VAZIO.                                    00192700
+           PERFORM 3000-PROCESSAR UNTIL WRK-FS-FUNC EQUAL 10.           00192800
+           PERFORM 4000-FINALIZAR.                                      00193000
+                                                                        00194000
+           STOP RUN.                                                    00195000
+      *----------------------------------------------------             00196000
+       0000-99-FIM.                       EXIT.                         00197000
+      *----------------------------------------------------             00198000
+                                                                        00199000
+      *----------------------------------------------------             00200000
+       1000-INICIAR                              SECTION.               00201000
+      *----------------------------------------------------             00202000
+           PERFORM 1100-ABRIR-ARQUIVOS.                                 00203000
+           PERFORM 5000-TESTE-STATUS.                                   00204000
+           ACCEPT WRK-TAM-FOLHA FROM SYSIN.                             00204126
+      *----------------------------------------------------             00205300
+       1000-99-FIM.             EXIT.                                   00205400
+      *----------------------------------------------------             00205500
+                                                                        00205600
+      *----------------------------------------------------             00205700
+       1050-DISP-CABEC                           SECTION.               00205800
+           WRITE FD-RELAT FROM WRK-LINBRANC.                            00205918
+           IF WRK-PAG EQUAL 1                                           00206023
+              WRITE FD-RELAT FROM WRK-CABEC1                            00206122
+           ELSE                                                         00206222
+              WRITE FD-RELAT FROM WRK-CABEC1 AFTER PAGE                 00206322
+           END-IF.                                                      00206422
+           WRITE FD-RELAT FROM WRK-LINBRANC.                            00206518
+           WRITE FD-RELAT FROM WRK-CABEC2 AFTER 2 LINE.                 00206621
+           ADD 6 TO WRK-LINHA.                                          00206724
+       1050-99-FIM.            EXIT.                                    00206800
+      *----------------------------------------------------             00206900
+                                                                        00207000
+      *----------------------------------------------------             00207100
+       1100-ABRIR-ARQUIVOS                       SECTION.               00207200
+           OPEN INPUT  FUNC                                             00207318
+                OUTPUT RELAT.                                           00207418
+       1100-99-FIM.                   EXIT.                             00207500
+      *----------------------------------------------------             00207600
+                                                                        00207700
+      *----------------------------------------------------             00207800
+       2000-TESTE-VAZIO                           SECTION.              00207931
+      *----------------------------------------------------             00208032
+           READ FUNC.                                                   00208130
+             IF WRK-FS-FUNC EQUAL 10                                    00208200
+               MOVE 'FIM DO ARQUIVO' TO WRK-MSGERRO                     00208300
+               PERFORM 9000-TRATA-ERROS                                 00208400
+             END-IF.                                                    00208500
+               PERFORM 2100-ATUALIZA-SETOR.                             00208632
+      *----------------------------------------------------             00208732
+       2000-99-FIM.                   EXIT.                             00208800
+      *----------------------------------------------------             00208930
+                                                                        00209030
+      *----------------------------------------------------             00209130
+       2100-ATUALIZA-SETOR                       SECTION.               00209232
+            PERFORM 1050-DISP-CABEC.                                    00209330
+             MOVE FD-SETORFUNC TO WRK-SET-AT.                           00209430
+       2100-99-FIM.    EXIT.                                            00209530
+      *----------------------------------------------------             00209600
+                                                                        00209700
+      *----------------------------------------------------             00209800
+       3000-PROCESSAR                            SECTION.               00210000
+      *----------------------------------------------------             00220000
+                                                                        00230031
+      *---------ADICAO-DE-VALORES-----------                            00270400
+           PERFORM 3050-MOVE-VARIAVEL.                                  00270532
+           ADD 1 TO WRK-CONTFUNC.                                       00271000
+           ADD 1 TO WRK-LINHA.                                          00272007
+            ADD WRK-SALFUNC TO WRK-SOMATOT.                             00290002
+                                                                        00300003
+      *---------PROCESSAMENTO-DE-SALARIOS---                            00300134
+             IF FD-SETORFUNC EQUAL WRK-SET-AT                           00300203
+                ADD WRK-SALFUNC TO WRK-SOMASET                          00300304
+                WRITE FD-RELAT FROM WRK-FUNC                            00300419
+             ELSE                                                       00300503
+                WRITE FD-RELAT FROM WRK-SOMA-SALARIO                    00300619
+                MOVE ZEROES TO WRK-SOMASET                              00300703
+                MOVE 1 TO WRK-LINHA                                     00300807
+                ADD 1 TO WRK-PAG                                        00301006
+                ADD WRK-SALFUNC TO WRK-SOMASET                          00301109
+                PERFORM 2100-ATUALIZA-SETOR                             00301332
+                WRITE FD-RELAT FROM WRK-FUNC                            00301419
+             END-IF.                                                    00301503
+                                                                        00301624
+      *---------QUEBRA-DE-LINHA-------------                            00301728
+             IF WRK-LINHA  GREATER WRK-TAM-FOLHA                        00301826
+                ADD 1 TO WRK-PAG                                        00301925
+                MOVE 1 TO WRK-LINHA                                     00302025
+                PERFORM 1050-DISP-CABEC                                 00302125
+             END-IF.                                                    00302225
+                                                                        00302424
+      *---------CONDICAO-DE-IMPRESSAO-------                            00303000
+           READ FUNC.                                                   00307100
+             IF WRK-FS-FUNC EQUAL 10                                    00308102
+                WRITE FD-RELAT FROM WRK-SOMA-SALARIO                    00308219
+             END-IF.                                                    00308402
+      *----------------------------------------------------             00308500
+       3000-99-FIM.             EXIT.                                   00308600
+      *----------------------------------------------------             00308700
+                                                                        00308800
+      *---------MOVIMENTACAO-DE-VARIAVEIS----------------------         00308905
+       3050-MOVE-VARIAVEL               SECTION.                        00309005
+           MOVE FD-IDFUNC    TO WRK-IDFUNC.                             00309105
+           MOVE FD-NOMEFUNC  TO WRK-NOMEFUNC.                           00309205
+           MOVE FD-SETORFUNC TO WRK-SETORFUNC.                          00309315
+           MOVE FD-SALFUNC   TO WRK-SALFUNC.                            00309405
+       3050-99-FIM.     EXIT.                                           00309505
+      *--------------------------------------------------------         00309605
+                                                                        00309700
+      *----------------------------------------------------             00309800
+       4000-FINALIZAR                            SECTION.               00310000
+      *----------------------------------------------------             00320000
+           PERFORM 4100-DISPLAY-FINAL.                                  00330000
+           PERFORM 4200-FECHAR.                                         00340000
+                                                                        00341000
+      *----------------------------------------------------             00342000
+       4100-DISPLAY-FINAL                        SECTION.               00343000
+           DISPLAY  WRK-LINBRANC.                                       00344024
+           DISPLAY  WRK-FINAL-SALTOT.                                   00345024
+           DISPLAY  WRK-TOT-FUNC.                                       00346024
+           DISPLAY  WRK-LINBRANC.                                       00347024
+           DISPLAY  WRK-FIM-REL.                                        00347124
+       4100-99-FIM.         EXIT.                                       00347200
+      *----------------------------------------------------             00347300
+                                                                        00347400
+      *----------------------------------------------------             00347500
+       4200-FECHAR                               SECTION.               00347600
+           CLOSE FUNC RELAT.                                            00347718
+       4200-99-FIM.         EXIT.                                       00347800
+      *----------------------------------------------------             00347900
+                                                                        00348000
+      *----------------------------------------------------             00349000
+       4000-99-FIM.             EXIT.                                   00350000
+      *----------------------------------------------------             00360000
+                                                                        00361000
+                                                                        00362000
+      *----------------------------------------------------             00362100
+       5000-TESTE-STATUS                         SECTION.               00362200
+      *----------------------------------------------------             00362300
+           PERFORM 5100-STATUS-FUNC.                                    00362434
+           PERFORM 5200-STATUS-RELAT.                                   00362534
+      *----------------------------------------------------             00363700
+       5000-99-FIM.               EXIT.                                 00364000
+      *----------------------------------------------------             00365000
+                                                                        00365134
+      *----------------------------------------------------             00365234
+       5100-STATUS-FUNC                          SECTION.               00365334
+           IF WRK-FS-FUNC NOT EQUAL ZEROES                              00365434
+              MOVE '1100'              TO WRK-SECAO                     00365534
+              MOVE 'ERRO NO OPEN FUNC' TO WRK-MSGERRO                   00365634
+              MOVE WRK-FS-FUNC         TO WRK-STATUS                    00365734
+              PERFORM 9000-TRATA-ERROS                                  00365834
+           END-IF.                                                      00365934
+       5100-99-FIM.    EXIT.                                            00366034
+      *----------------------------------------------------             00366134
+                                                                        00366234
+      *----------------------------------------------------             00366334
+       5200-STATUS-RELAT                         SECTION.               00366434
+           IF WRK-FS-RELAT NOT EQUAL ZEROES                             00366534
+              MOVE '1100'               TO WRK-SECAO                    00366634
+              MOVE 'ERRO NO OPEN RELAT' TO WRK-MSGERRO                  00366734
+              MOVE WRK-FS-RELAT         TO WRK-STATUS                   00366834
+              PERFORM 9000-TRATA-ERROS                                  00366934
+           END-IF.                                                      00367034
+       5200-99-FIM.    EXIT.                                            00367134
+      *----------------------------------------------------             00367234
+                                                                        00367300
+      *----------------------------------------------------             00367400
+       9000-TRATA-ERROS                          SECTION.               00368000
+      *----------------------------------------------------             00369000
+           MOVE 'REL1805' TO WRK-PROGRAMA.                              00370029
+           CALL WRK-GRAVALOG USING WRK-DADOS.                           00380018
+           GOBACK.                                                      00390000
+      *----------------------------------------------------             00400000
+       9000-99-FIM.             EXIT.                                   00410000
+      *----------------------------------------------------             00420000

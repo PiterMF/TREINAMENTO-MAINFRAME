@@ -1,0 +1,40 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+       PROGRAM-ID. FR18CB14.                                            00040001
+                                                                        00050000
+      *=====================================================            00060000
+      *  AUTOR: PITER FANTI                                             00070003
+      *  EMPRESA: FOURSYS                                               00080000
+      *=====================================================            00090000
+                                                                        00100000
+      *====================================================             00101000
+       ENVIRONMENT                               DIVISION.              00102000
+      *====================================================             00103000
+       CONFIGURATION                             SECTION.               00103115
+       SPECIAL-NAMES.                                                   00103213
+           DECIMAL-POINT IS COMMA.                                      00103313
+                                                                        00104000
+      *====================================================             00105000
+       DATA                                      DIVISION.              00106000
+      *====================================================             00107000
+       WORKING-STORAGE                         SECTION.                 00108000
+       01 WRK-DADOS.                                                    00108100
+          05 WRK-FUNC        PIC X(15)         VALUE SPACES.            00108216
+          05 WRK-TOTVEND     PIC 9(05)V99      VALUE ZEROES.            00108316
+          05 WRK-COMISSAO    PIC 9(02)V99      VALUE ZEROES.            00108416
+       77 WRK-VALCOMISSAO    PIC 9(07)V99      VALUE ZEROES.            00108516
+       77 WRK-VALCOMISSAO-ED PIC $Z.ZZZ.ZZ9,99.                         00108616
+      *====================================================             00108900
+       PROCEDURE                                 DIVISION.              00109000
+      *====================================================             00109100
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00109200
+           DISPLAY 'FUNCIONARIO............' WRK-FUNC.                  00109303
+           DISPLAY 'TOTAL DE VENDAS........' WRK-TOTVEND.               00109403
+           DISPLAY 'COMISSAO...............' WRK-COMISSAO.              00109503
+            MULTIPLY WRK-TOTVEND BY WRK-COMISSAO                        00109616
+                     GIVING WRK-VALCOMISSAO.                            00109716
+           MOVE WRK-VALCOMISSAO TO WRK-VALCOMISSAO-ED.                  00109813
+           DISPLAY 'VALOR DA COMISSAO......' WRK-VALCOMISSAO.           00109907
+           DISPLAY 'VALOR DA COMISSAO......' WRK-VALCOMISSAO-ED.        00110013
+           STOP RUN.                                                    00120000

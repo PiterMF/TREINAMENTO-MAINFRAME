@@ -1,0 +1,48 @@
+      *================================================================*00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *================================================================*00030000
+       PROGRAM-ID. FR18CB03.                                            00040000
+                                                                        00050000
+      *==========================================================*      00100000
+      *  INSTRUTOR  : IVAN SANCHES                               *      00100101
+      *  AUTOR      : PITER FANTI                                *      00100300
+      *  EMPRESA    : FOURSYS                                    *      00100400
+      *----------------------------------------------------------*      00100500
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO  *      00100600
+      *   1.0   13/05/22  PITER FANTI    VERSAO INICIAL          *      00100700
+      *----------------------------------------------------------*      00100800
+      *  OBJETIVO   : ACEITA LINHA DE DADOS DA SYSIN E IMPRIME   *      00100900
+      *               NA TELA (USO DE VARIAVEL PAI)              *      00101000
+      *==========================================================*      00102000
+                                                                        00102100
+      *================================================================*00102200
+       ENVIRONMENT                               DIVISION.              00102300
+      *================================================================*00103000
+       CONFIGURATION                             SECTION.               00103100
+       SPECIAL-NAMES.                                                   00103200
+           DECIMAL-POINT IS COMMA.                                      00104000
+      *================================================================*00105000
+       DATA                                      DIVISION.              00106000
+      *================================================================*00107000
+       WORKING-STORAGE                           SECTION.               00108000
+       01 WRK-DADOS.                                                    00109000
+          05 WRK-CODIGO  PIC X(07)     VALUE SPACES.                    00109100
+          05 WRK-NOME    PIC X(23)     VALUE SPACES.                    00109200
+          05 WRK-AREA    PIC X(10)     VALUE SPACES.                    00110000
+          05 WRK-ESTADO  PIC X(02)     VALUE SPACES.                    00111000
+          05 WRK-SALARIO PIC 9(05)V99  VALUE ZEROES.                    00120000
+       77 WRK-SALARIO-ED PIC ZZ.ZZ9,99.                                 00130000
+      *EXEMPLO SYSIN:                                                   00130100
+      *0563479PITER MALHEIROS FANTI  ENG. COMP.SP0184579                00131000
+      *================================================================*00140000
+       PROCEDURE                                 DIVISION.              00150000
+      *================================================================*00160000
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00170000
+           DISPLAY 'CODIGO.....' WRK-CODIGO.                            00172000
+           DISPLAY 'NOME.......' WRK-NOME.                              00173000
+           DISPLAY 'AREA.......' WRK-AREA.                              00173100
+           DISPLAY 'ESTADO.....' WRK-ESTADO.                            00173200
+           DISPLAY 'SALARIO....' WRK-SALARIO.                           00173300
+           MOVE WRK-SALARIO TO WRK-SALARIO-ED.                          00173400
+           DISPLAY 'SALARIO-ED.' WRK-SALARIO-ED.                        00173500
+           STOP RUN.                                                    00174000

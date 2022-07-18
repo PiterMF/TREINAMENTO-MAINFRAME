@@ -1,0 +1,346 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00031000
+       PROGRAM-ID. MD021804.                                            00032000
+                                                                        00033000
+      *=========================================================*       00034000
+      *  AUTOR      : PITER FANTI                               *       00034100
+      *  INSTRUTOR  : IVAN SANCHES                              *       00034200
+      *  EMPRESA    : FOURSYS                                   *       00034300
+      *---------------------------------------------------------*       00034400
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00034500
+      *   1.0   12/07/22  PITER FANTI    VERSAO INICIAL         *       00034600
+      *---------------------------------------------------------*       00034700
+      *  OBJETIVO   : LER UM ARQUIVO COBOL COM VARIOS REGISTROS *       00034800
+      *               E ATUALIZAR EM MASSA TODOS OS REGISTROS   *       00034900
+      *               EXISTENTES EM OUTRO ARQUIVO VSAM.         *       00035000
+      *               ARQUIVO COBOL: MOV1207                    *       00035100
+      *               ARQUIVO VSAM : EVSA0407                   *       00035200
+      *---------------------------------------------------------*       00035300
+      *  ARQUIVOS   :                                           *       00035400
+      *   DDNAME          I/O              INCLUDE/BOOK         *       00035500
+      *   EVSA0407         O                 FR18W407           *       00035600
+      *   MOV1207          I                    -               *       00035700
+4SYS18*   EXC1207          O                    -               *       00035812
+      *---------------------------------------------------------*       00035900
+      *  MODULOS    :     I/O                INCLUDE/BOOK       *       00036000
+      *   GRAVALOG         I                    #GLOGPT         *       00036100
+      *   DATA E HORA      I                    FR18WDTA        *       00036209
+      *---------------------------------------------------------*       00036309
+4SYS18*                  A L T E R A C O E S                    *       00036409
+      *---------------------------------------------------------*       00036509
+4SYS18* ANALISTA......:PITER MALHEIROS FANTI        4SYS18      *       00036609
+4SYS18* DATA..........:  /07/2020                               *       00036709
+      *---------------------------------------------------------*       00036809
+4SYS18*  OBJETIVO   :  OS REGISTROS NAO GRAVADOS SAO AGORA      *       00036910
+4SYS18*                GRAVADOS NO ARQUIVO EXC1207              *       00037010
+      *                                                         *       00037110
+      *=========================================================*       00037209
+                                                                        00037309
+      *====================================================             00037409
+       ENVIRONMENT                               DIVISION.              00037509
+      *====================================================             00037609
+       INPUT-OUTPUT                              SECTION.               00037709
+       FILE-CONTROL.                                                    00037809
+           SELECT EVSA0407 ASSIGN TO EVSA0407                           00037909
+               ORGANIZATION IS INDEXED                                  00038009
+               ACCESS MODE  IS DYNAMIC                                  00038109
+               RECORD KEY   IS FD-EVSA-CHAVE                            00038209
+               FILE STATUS  IS WRK-FS-EVSA0407.                         00038309
+                                                                        00038409
+           SELECT MOV1207 ASSIGN TO MOV1207                             00038509
+               FILE STATUS IS WRK-FS-MOV1207.                           00038609
+                                                                        00038709
+4SYS18     SELECT EXC1207  ASSIGN TO EXC1207                            00038810
+4SYS18         FILE STATUS IS WRK-FS-EXC1207.                           00038910
+                                                                        00039009
+      *====================================================             00039109
+       DATA                                      DIVISION.              00040000
+      *====================================================             00041000
+       FILE                                    SECTION.                 00042000
+       FD EVSA0407.                                                     00043000
+                                                                        00044000
+      *-------LRECL19-----------                                        00045000
+       COPY FR18W407.                                                   00046000
+                                                                        00047000
+       FD MOV1207                                                       00048000
+            RECORDING MODE IS F                                         00049000
+            BLOCK CONTAINS 0 RECORDS.                                   00050000
+                                                                        00060000
+      *-------LRECL-19----------                                        00070000
+       01 FD-MOV1207.                                                   00071000
+          05 FD-MOV1207-CHAVE.                                          00071100
+             10 FD-MOV1207-AGENCIA PIC X(04).                           00071200
+             10 FD-MOV1207-CONTA   PIC X(05).                           00071300
+          05 FD-MOV1207-SALARIO    PIC X(10).                           00071407
+                                                                        00072000
+4SYS18 FD EXC1207                                                       00073010
+  .         RECORDING MODE IS F                                         00074010
+4SYS18      BLOCK CONTAINS 0 RECORDS.                                   00075010
+                                                                        00076000
+      *-------LRECL-19----------                                        00077010
+4SYS18 01 FD-EXC1207            PIC X(19).                              00078010
+                                                                        00079000
+      *----------------------------------------------------             00080000
+       WORKING-STORAGE                         SECTION.                 00090000
+      *----------------------------------------------------             00100000
+      *------------------------------                                   00110000
+       01 FILLER PIC X(30) VALUE 'AREA DE DADOS PARA OPERACAO'.         00110100
+      *------------------------------                                   00110200
+       01 WRK-EVSA0407.                                                 00110300
+          05 WRK-EVSA-CHAVE.                                            00110400
+             10 WRK-EVSA-AGENCIA PIC X(04).                             00110500
+             10 WRK-EVSA-CONTA   PIC X(05).                             00110600
+          05 WRK-EVSA-SALARIO    PIC X(10).                             00110700
+                                                                        00110800
+      *------------------------------                                   00110900
+       01 FILLER PIC X(30) VALUE 'AREA DE LOG DE ERROS'.                00111000
+      *------------------------------                                   00112000
+           COPY '#GLOGPT'.                                              00113000
+                                                                        00114000
+      *------------------------------                                   00114104
+       01 FILLER PIC X(30) VALUE 'AREA DE DATA E HORA'.                 00114204
+      *------------------------------                                   00114304
+           COPY FR18WDTA.                                               00114409
+                                                                        00117204
+      *------------------------------                                   00117304
+       01 FILLER PIC X(30) VALUE 'AREA DE DISPLAY'.                     00117404
+      *------------------------------                                   00117504
+       01 WRK-FINAL-REL.                                                00118000
+          05 FILLER PIC X(37) VALUE                                     00119000
+                  '-------FINAL DO PROCESSAMENTO-------'.               00120000
+                                                                        00130000
+                                                                        00131004
+       77 WRK-LINBRANC       PIC X(30) VALUE SPACES.                    00140004
+       77 WRK-LINPONT        PIC X(30) VALUE ALL '-'.                   00150007
+                                                                        00160000
+      *---------------------------------                                00170000
+       77 FILLER PIC X(20) VALUE 'AREA DE STATUS'.                      00180000
+      *---------------------------------                                00181000
+       77 WRK-FS-EVSA0407 PIC 9(02).                                    00182000
+       77 WRK-FS-MOV1207  PIC 9(02).                                    00183007
+       77 WRK-FS-EXC1207  PIC 9(02).                                    00184010
+                                                                        00185000
+      *-------LOG-DE-ERROS-------------                                 00186000
+      *77 WRK-GRAVALOG PIC X(08) VALUE 'GRAVALOG'.                      00187000
+                                                                        00188000
+      *---------------------------------                                00189000
+       77 FILLER PIC X(20) VALUE 'AREA DE CONTADORES'.                  00190000
+      *---------------------------------                                00191000
+       77 WRK-CONT-LID    PIC 9(02) COMP-3 VALUE ZEROES.                00191114
+       77 WRK-CONT-GRAV   PIC 9(02) COMP-3 VALUE ZEROES.                00191214
+       77 WRK-CONT-N-GRAV PIC 9(02) COMP-3 VALUE ZEROES.                00191314
+                                                                        00191400
+      *====================================================             00192700
+       PROCEDURE                                 DIVISION.              00192800
+      *====================================================             00192900
+                                                                        00193000
+      *----------------------------------------------------             00193100
+       0000-PRINCIPAL                            SECTION.               00193200
+      *----------------------------------------------------             00193300
+           PERFORM 1000-INICIAR.                                        00193400
+              PERFORM 1200-TESTAR-VAZIO.                                00193500
+           PERFORM 2000-PROCESSAR UNTIL WRK-FS-MOV1207 EQUAL 10.        00193600
+           PERFORM 3000-FINALIZAR.                                      00193700
+                                                                        00193800
+           STOP RUN.                                                    00193900
+      *----------------------------------------------------             00194000
+       0000-99-FIM.                       EXIT.                         00194100
+      *----------------------------------------------------             00194200
+                                                                        00194300
+      *----------------------------------------------------             00194400
+       1000-INICIAR                              SECTION.               00194500
+      *----------------------------------------------------             00194600
+           PERFORM 1050-DATA-E-HORA.                                    00194704
+           PERFORM 1100-ABRIR-ARQUIVOS.                                 00194804
+           PERFORM 4000-TESTE-STATUS.                                   00194904
+      *----------------------------------------------------             00195004
+       1000-99-FIM.             EXIT.                                   00195104
+      *----------------------------------------------------             00195204
+                                                                        00195304
+      *----------------------------------------------------             00195404
+       1050-DATA-E-HORA                          SECTION.               00195504
+           ACCEPT WRK-DATA FROM DATE YYYYMMDD.                          00195605
+           ACCEPT WRK-HORA FROM TIME.                                   00195707
+           MOVE CORR WRK-DATA TO WRK-DATA-ED.                           00195805
+           MOVE CORR WRK-HORA TO WRK-HORA-ED.                           00195905
+       1050-99-FIM.                   EXIT.                             00196105
+      *----------------------------------------------------             00196205
+                                                                        00196305
+      *----------------------------------------------------             00196405
+       1100-ABRIR-ARQUIVOS                       SECTION.               00196505
+           OPEN I-O    EVSA0407.                                        00196605
+           OPEN INPUT  MOV1207.                                         00196705
+           OPEN OUTPUT EXC1207.                                         00196810
+       1100-99-FIM.                   EXIT.                             00196910
+      *----------------------------------------------------             00197010
+                                                                        00197110
+      *----------------------------------------------------             00197210
+       1200-TESTAR-VAZIO                        SECTION.                00197310
+            READ MOV1207.                                               00197410
+            IF WRK-FS-MOV1207 NOT EQUAL ZEROES                          00197510
+               DISPLAY ' SEM REGISTROS PARA ATUALIZAR '                 00197610
+               PERFORM 3000-FINALIZAR                                   00197710
+            END-IF.                                                     00197810
+       1200-99-FIM.                   EXIT.                             00197910
+      *----------------------------------------------------             00198000
+                                                                        00199000
+      *----------------------------------------------------             00200000
+       2000-PROCESSAR                            SECTION.               00201000
+      *----------------------------------------------------             00202000
+            INITIALIZE WRK-EVSA0407.                                    00202113
+            ADD 1 TO WRK-CONT-LID.                                      00202200
+            MOVE FD-MOV1207-CHAVE TO FD-EVSA-CHAVE.                     00202910
+            MOVE FD-MOV1207       TO WRK-EVSA0407.                      00203010
+              READ EVSA0407.                                            00203100
+                IF WRK-FS-EVSA0407 EQUAL ZEROES                         00203200
+                   PERFORM 2100-CONSISTIR-GRAVACAO                      00203310
+                ELSE                                                    00204410
+                   WRITE  FD-EXC1207 FROM WRK-EVSA0407                  00204510
+                      IF WRK-FS-EXC1207  EQUAL ZEROES                   00204612
+                         ADD 1 TO WRK-CONT-N-GRAV                       00204712
+                      END-IF                                            00204812
+                END-IF.                                                 00204910
+            READ MOV1207.                                               00205110
+      *----------------------------------------------------             00205210
+       2000-99-FIM.             EXIT.                                   00205310
+      *----------------------------------------------------             00205410
+                                                                        00206000
+      *----------------------------------------------------             00244000
+       2100-CONSISTIR-GRAVACAO              SECTION.                    00245010
+            IF FD-MOV1207-SALARIO EQUAL ZEROES OR                       00246000
+               FD-MOV1207-SALARIO IS NOT NUMERIC                        00247000
+                  WRITE  FD-EXC1207 FROM WRK-EVSA0407                   00248010
+                    IF WRK-FS-EXC1207  EQUAL ZEROES                     00249012
+                       ADD 1 TO WRK-CONT-N-GRAV                         00249112
+                    END-IF                                              00249212
+            ELSE                                                        00250000
+                  REWRITE FD-EVSA0407 FROM WRK-EVSA0407                 00260210
+                     IF WRK-FS-EVSA0407 EQUAL ZEROES                    00260312
+                        ADD 1 TO WRK-CONT-GRAV                          00260412
+                     END-IF                                             00260512
+            END-IF.                                                     00262000
+       2100-99-FIM.                   EXIT.                             00263000
+      *----------------------------------------------------             00264000
+                                                                        00265000
+      *----------------------------------------------------             00266000
+       3000-FINALIZAR                            SECTION.               00266100
+      *----------------------------------------------------             00266200
+           PERFORM 3100-DISPLAY-FINAL.                                  00266300
+           PERFORM 3200-FECHAR.                                         00266400
+      *----------------------------------------------------             00266500
+       3000-99-FIM.             EXIT.                                   00266600
+      *----------------------------------------------------             00266700
+                                                                        00266800
+      *----------------------------------------------------             00266900
+       3100-DISPLAY-FINAL                        SECTION.               00267000
+           DISPLAY WRK-LINBRANC.                                        00268004
+           DISPLAY 'REGISTROS LIDOS:        ' WRK-CONT-LID.             00269004
+           DISPLAY 'REGISTROS GRAVADOS:     ' WRK-CONT-GRAV.            00270004
+           DISPLAY 'REGISTROS NAO GRAVADOS: ' WRK-CONT-N-GRAV.          00271004
+           DISPLAY WRK-LINBRANC.                                        00272000
+           DISPLAY WRK-LINPONT.                                         00272104
+           DISPLAY WRK-DATA-DISP WRK-DATA-ED.                           00272204
+           DISPLAY WRK-HORA-DISP WRK-HORA-ED.                           00272304
+           DISPLAY WRK-LINPONT.                                         00272404
+           DISPLAY WRK-LINBRANC.                                        00272604
+           DISPLAY WRK-FINAL-REL.                                       00273000
+       3100-99-FIM.         EXIT.                                       00274000
+      *----------------------------------------------------             00275000
+                                                                        00276000
+      *----------------------------------------------------             00277000
+       3200-FECHAR                               SECTION.               00278000
+           CLOSE EVSA0407 MOV1207 EXC1207.                              00279011
+           PERFORM 3300-TESTE-FECHAR-EVSA0407.                          00280011
+           PERFORM 3400-TESTE-FECHAR-MOV1207.                           00290011
+4SYS18     PERFORM 3500-TESTE-FECHAR-EXC1207.                           00300011
+       3200-99-FIM.         EXIT.                                       00310000
+      *----------------------------------------------------             00311000
+                                                                        00312000
+      *----------------------------------------------------             00313000
+       3300-TESTE-FECHAR-EVSA0407                SECTION.               00314011
+           IF WRK-FS-EVSA0407 NOT EQUAL ZEROES                          00315011
+              MOVE '3200'                   TO WRK-SECAO                00316011
+              MOVE 'ERRO NO CLOSE EVSA0407' TO WRK-MSGERRO              00316111
+              MOVE WRK-FS-EVSA0407          TO WRK-STATUS               00316211
+              PERFORM 9000-TRATA-ERROS                                  00316311
+           END-IF.                                                      00316411
+       3300-99-FIM.         EXIT.                                       00316511
+      *----------------------------------------------------             00316600
+                                                                        00316700
+      *----------------------------------------------------             00316800
+       3400-TESTE-FECHAR-MOV1207                 SECTION.               00316911
+           IF WRK-FS-MOV1207 NOT EQUAL ZEROES                           00317011
+              MOVE '3200'                   TO WRK-SECAO                00317111
+              MOVE 'ERRO NO CLOSE MOV1207' TO WRK-MSGERRO               00317211
+              MOVE WRK-FS-MOV1207           TO WRK-STATUS               00317311
+              PERFORM 9000-TRATA-ERROS                                  00317411
+           END-IF.                                                      00317511
+       3400-99-FIM.         EXIT.                                       00317611
+      *----------------------------------------------------             00317700
+                                                                        00317800
+      *----------------------------------------------------             00317900
+4SYS18 3500-TESTE-FECHAR-EXC1207                 SECTION.               00318011
+  .        IF WRK-FS-EXC1207 NOT EQUAL ZEROES                           00318111
+  .           MOVE '3200'                   TO WRK-SECAO                00318211
+  .           MOVE 'ERRO NO CLOSE EXC1207' TO WRK-MSGERRO               00318311
+  .           MOVE WRK-FS-EXC1207           TO WRK-STATUS               00318411
+  .           PERFORM 9000-TRATA-ERROS                                  00318511
+  .        END-IF.                                                      00318611
+4SYS18 3500-99-FIM.         EXIT.                                       00318711
+      *----------------------------------------------------             00318800
+                                                                        00318900
+      *----------------------------------------------------             00319000
+       4000-TESTE-STATUS                         SECTION.               00319100
+            PERFORM 4100-TESTE-STATUS-EVSA0407.                         00319211
+            PERFORM 4200-TESTE-STATUS-MOV1207.                          00319311
+4SYS18      PERFORM 4300-TESTE-STATUS-EXC1207.                          00319411
+       4000-99-FIM.    EXIT.                                            00319500
+      *----------------------------------------------------             00319600
+                                                                        00319700
+      *----------------------------------------------------             00319800
+       4100-TESTE-STATUS-EVSA0407                SECTION.               00319911
+           IF WRK-FS-EVSA0407 NOT EQUAL ZEROES                          00320000
+              MOVE '1100'                  TO WRK-SECAO                 00330000
+              MOVE 'ERRO NO OPEN EVSA0407' TO WRK-MSGERRO               00340000
+              MOVE WRK-FS-EVSA0407         TO WRK-STATUS                00350000
+              PERFORM 9000-TRATA-ERROS                                  00360000
+           END-IF.                                                      00361000
+       4100-99-FIM.    EXIT.                                            00362011
+      *----------------------------------------------------             00363000
+                                                                        00364000
+      *----------------------------------------------------             00365000
+       4200-TESTE-STATUS-MOV1207                 SECTION.               00365111
+           IF WRK-FS-MOV1207 NOT EQUAL ZEROES                           00365211
+              MOVE '1100'                  TO WRK-SECAO                 00365311
+              MOVE 'ERRO NO OPEN MOV1207'  TO WRK-MSGERRO               00365411
+              MOVE WRK-FS-MOV1207          TO WRK-STATUS                00365511
+              PERFORM 9000-TRATA-ERROS                                  00365611
+           END-IF.                                                      00365711
+       4200-99-FIM.    EXIT.                                            00365811
+      *----------------------------------------------------             00365900
+                                                                        00366000
+      *----------------------------------------------------             00366100
+       4300-TESTE-STATUS-EXC1207                 SECTION.               00366211
+           IF WRK-FS-EXC1207 NOT EQUAL ZEROES                           00366311
+              MOVE '1100'                  TO WRK-SECAO                 00366411
+              MOVE 'ERRO NO OPEN EXC1207'  TO WRK-MSGERRO               00366511
+              MOVE WRK-FS-EXC1207          TO WRK-STATUS                00366611
+              PERFORM 9000-TRATA-ERROS                                  00366711
+           END-IF.                                                      00366811
+       4300-99-FIM.    EXIT.                                            00366911
+      *----------------------------------------------------             00367000
+                                                                        00367100
+      *----------------------------------------------------             00367200
+       9000-TRATA-ERROS                          SECTION.               00367300
+      *----------------------------------------------------             00367400
+           MOVE 'MD021804' TO WRK-PROGRAMA.                             00367500
+           DISPLAY WRK-MSGERRO.                                         00367600
+           DISPLAY 'CODIGO VSAM: ' WRK-FS-EVSA0407.                     00367700
+           DISPLAY WRK-FINAL-REL.                                       00367800
+      *    CALL WRK-GRAVALOG USING WRK-DADOS.                           00367900
+           GOBACK.                                                      00368000
+      *----------------------------------------------------             00368100
+       9000-99-FIM.             EXIT.                                   00368200
+      *----------------------------------------------------             00368300

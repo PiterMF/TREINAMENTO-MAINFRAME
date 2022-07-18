@@ -1,0 +1,55 @@
+      *=====================================================
+       IDENTIFICATION DIVISION.
+      *=====================================================
+
+       PROGRAM-ID. PRGLOGPT.
+
+      *=====================================================
+       ENVIRONMENT DIVISION.
+      *=====================================================
+      *=====================================================
+       DATA DIVISION.
+      *=====================================================
+       WORKING-STORAGE      SECTION.
+      *=====================================================
+       07 WRK-NOMEPROG PIC X(08) VALUE 'PRGLOGPT'.
+
+       01 WRK-DADOS.
+            05 WRK-PROGRAMA PIC X(08).
+            05 WRK-SECAO    PIC X(04).
+            05 WRK-MSGERRO  PIC X(30).
+      *=====================================================
+       PROCEDURE DIVISION.
+      *=====================================================
+      *-----------------------------------------------------
+       0000-PRINCIPAL          SECTION.
+      *-----------------------------------------------------
+               PERFORM 1000-INICIAR.
+               PERFORM 2000-PROCESSAR.
+
+               STOP RUN.
+
+      *-----------------------------------------------------
+       1000-INICIAR            SECTION.
+      *-----------------------------------------------------
+
+
+                MOVE WRK-NOMEPROG      TO WRK-PROGRAMA.
+                MOVE '1000'            TO WRK-SECAO.
+                MOVE 'ERRO NA LEITURA' TO WRK-MSGERRO
+                 PERFORM 9000-TRATA-ERROS.
+
+      *-----------------------------------------------------
+       2000-PROCESSAR            SECTION.
+      *-----------------------------------------------------
+
+
+                MOVE WRK-NOMEPROG      TO WRK-PROGRAMA.
+                MOVE '2000'            TO WRK-SECAO.
+                MOVE 'ERRO NO CLOSE'   TO WRK-MSGERRO
+                 PERFORM 9000-TRATA-ERROS.
+
+      *-----------------------------------------------------
+       9000-TRATA-ERROS       SECTION.
+      *-----------------------------------------------------
+                  CALL 'GRAVALOG' USING WRK-DADOS.

@@ -1,0 +1,339 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00031000
+       PROGRAM-ID. FR18EX02.                                            00032000
+                                                                        00033000
+      *=========================================================*       00034000
+      *  GERENTE DO : IVAN SANCHES                              *       00034100
+      *  PROJETO                                                *       00034200
+      *  AUTOR      : PITER FANTI                               *       00035000
+      *  EMPRESA    : FOURSYS                                   *       00035200
+      *---------------------------------------------------------*       00035400
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00035500
+      *   1.0   30/05/22  PITER FANTI    VERSAO INICIAL         *       00035600
+      *   1.1   31/05/22  PITER FANTI    GRAVA FUNC SEM PROJETO *       00035700
+      *---------------------------------------------------------*       00035800
+      *  OBJETIVO   : BALANCE LINE TIPO 1: ESTE PROGRAMA TEM A  *       00035900
+      *               FINALIDADE DE RECEBER DADOS DOS ARQUIVOS  *       00036000
+      *               DE ENTRADA FUNC E PROJ, FAZER A RELACAO   *       00036100
+      *               (BALANCO) ENTRE AS CHAVES E GRAVAR NO     *       00036200
+      *               ARQUIVO DE SAIDA FUNPROJ.                 *       00036300
+      *---------------------------------------------------------*       00037000
+      *  ARQUIVOS   :                                           *       00038000
+      *   DDNAME          I/O                INCLUDE/BOOK       *       00039000
+      *   EFUNC            I                    #LERFUNC        *       00040000
+      *   EPROJ            I                    #LERPROJ        *       00040100
+      *   SFUNPROJ         O                       -            *       00041000
+      *---------------------------------------------------------*       00042000
+      *  MODULOS    :                             BOOK          *       00043000
+      *   GRAVALOG    - TRATAMENTO DE ERROS     (#GLOGPT)       *       00044000
+      *=========================================================*       00045000
+                                                                        00046000
+      *====================================================             00047000
+       ENVIRONMENT                               DIVISION.              00048000
+      *====================================================             00049000
+       INPUT-OUTPUT                              SECTION.               00050000
+       FILE-CONTROL.                                                    00060000
+           SELECT FUNC ASSIGN TO FUNC                                   00070000
+               FILE STATUS IS WRK-FS-FUNC.                              00080000
+                                                                        00090000
+           SELECT PROJ ASSIGN TO PROJ                                   00091000
+               FILE STATUS IS WRK-FS-PROJ.                              00092000
+                                                                        00093000
+           SELECT FUNPROJ ASSIGN TO FUNPROJ                             00100000
+               FILE STATUS IS WRK-FS-FUNPROJ.                           00110000
+                                                                        00120000
+           SELECT SEMPROJ ASSIGN TO SEMPROJ                             00121000
+               FILE STATUS IS WRK-FS-SEMPROJ.                           00122000
+                                                                        00123000
+      *====================================================             00130000
+       DATA                                      DIVISION.              00140000
+      *====================================================             00141000
+       FILE                                    SECTION.                 00142000
+       FD FUNC                                                          00143000
+           RECORDING MODE IS F                                          00144000
+           LABEL RECORD IS STANDARD                                     00145000
+           BLOCK CONTAINS 0 RECORDS.                                    00146000
+                                                                        00147000
+      *-------LRECL-39----------                                        00148000
+           COPY '#LERFUNC'.                                             00149000
+                                                                        00150000
+      *---------------------------------------------                    00150100
+       FD PROJ                                                          00151000
+           RECORDING MODE IS F                                          00152000
+           LABEL RECORD IS STANDARD                                     00153000
+           BLOCK CONTAINS 0 RECORDS.                                    00154000
+                                                                        00154100
+      *------LRECL-28----------                                         00154200
+           COPY '#LERPROJ'.                                             00154300
+                                                                        00154800
+      *----------------------------------------------                   00156000
+       FD FUNPROJ                                                       00160000
+           RECORDING MODE IS F                                          00161000
+           LABEL RECORD IS STANDARD                                     00162000
+           BLOCK CONTAINS 0 RECORDS.                                    00163000
+                                                                        00164000
+      *--------LRECL-58--------                                         00164100
+       01 FD-FUNPROJ PIC X(58).                                         00164200
+                                                                        00164300
+      *----------------------------------------------                   00164400
+       FD SEMPROJ                                                       00164500
+           RECORDING MODE IS F                                          00164600
+           LABEL RECORD IS STANDARD                                     00164700
+           BLOCK CONTAINS 0 RECORDS.                                    00164800
+                                                                        00164900
+      *--------LRECL-58--------                                         00165000
+       01 FD-SEMPROJ PIC X(58).                                         00165100
+                                                                        00165200
+      *----------------------------------------------------             00165300
+       WORKING-STORAGE                         SECTION.                 00165400
+      *----------------------------------------------------             00165500
+                                                                        00165600
+      *---DADOS-FUNCIONARIO-COM-PROJETO--------                         00166000
+       01 WRK-FUNPROJ.                                                  00187700
+          05 WRK-IDFUNC   PIC X(05).                                    00187800
+          05 WRK-NOMEFUNC PIC X(30).                                    00187900
+          05 WRK-PROJETO  PIC X(20).                                    00188000
+          05 WRK-QTHORAS  PIC 9(03).                                    00188100
+                                                                        00188200
+      *---DADOS-FUNCIONARIO-SEM-PROJETO--------                         00188300
+       01 WRK-SEMPROJ.                                                  00188400
+          05 WRK-SEM-IDFUNC   PIC X(05).                                00188500
+          05 WRK-SEM-NOMEFUNC PIC X(30).                                00188600
+          05 FILLER           PIC X(12) VALUE ' SEM PROJETO'.           00188700
+          05 FILLER           PIC X(11) VALUE SPACES.                   00188800
+                                                                        00188900
+      *-----LOG-DE-ERROS-----                                           00189000
+           COPY '#GLOGPT'.                                              00189100
+                                                                        00189200
+      *-----DISPLAY-FINAL-DO-RELATORIO-----                             00189300
+       01 WRK-FINAL-REL.                                                00190000
+          05 WRK-FIM-REL.                                               00190200
+             10 FILLER PIC X(40) VALUE                                  00190300
+                  '-----------FINAL DO RELATORIO-----------'.           00190400
+                                                                        00190500
+      *-------CONTADORES,-STATUS-E-FORMATACAO--------                   00190600
+       77 WRK-FS-FUNC    PIC 9(02).                                     00190700
+       77 WRK-FS-PROJ    PIC 9(02).                                     00190800
+       77 WRK-FS-FUNPROJ PIC 9(02).                                     00190900
+       77 WRK-FS-SEMPROJ PIC 9(02).                                     00191000
+       77 WRK-LINBRANC   PIC X(58)      VALUE SPACES.                   00191100
+                                                                        00191300
+      *-----FUNCIONARIO-ATUAL-E-FLAG-----                               00191400
+       77 WRK-ID-ATUAL PIC X(02).                                       00191500
+       77 WRK-FLAG     PIC 9(01).                                       00191600
+                                                                        00191700
+      *-------LOG-DE-ERROS----------------------------                  00191800
+       77 WRK-GRAVALOG PIC X(08) VALUE 'GRAVALOG'.                      00191900
+                                                                        00192000
+      *====================================================             00192100
+       PROCEDURE                                 DIVISION.              00192200
+      *====================================================             00192300
+                                                                        00192400
+      *----------------------------------------------------             00192500
+       0000-PRINCIPAL                            SECTION.               00192600
+      *----------------------------------------------------             00192700
+           PERFORM 1000-INICIAR.                                        00192800
+             PERFORM 1200-TESTE-VAZIO.                                  00192900
+           PERFORM 2000-PROCESSAR UNTIL WRK-FS-FUNC EQUAL 10 AND        00193000
+                                        WRK-FS-PROJ EQUAL 10.           00193100
+           PERFORM 3000-FINALIZAR.                                      00193200
+                                                                        00193300
+           STOP RUN.                                                    00194000
+      *----------------------------------------------------             00195000
+       0000-99-FIM.                       EXIT.                         00196000
+      *----------------------------------------------------             00197000
+                                                                        00198000
+      *----------------------------------------------------             00199000
+       1000-INICIAR                              SECTION.               00200000
+      *----------------------------------------------------             00201000
+           PERFORM 1100-ABRIR-ARQUIVOS.                                 00202000
+           PERFORM 1300-ATUALIZA-FUNC.                                  00202100
+           PERFORM 4000-TESTE-STATUS.                                   00203000
+      *----------------------------------------------------             00205000
+       1000-99-FIM.             EXIT.                                   00205100
+      *----------------------------------------------------             00205200
+                                                                        00205300
+      *----------------------------------------------------             00206800
+       1100-ABRIR-ARQUIVOS                       SECTION.               00206900
+           OPEN INPUT  FUNC PROJ                                        00207000
+                OUTPUT FUNPROJ SEMPROJ.                                 00207100
+       1100-99-FIM.                   EXIT.                             00207200
+      *----------------------------------------------------             00207300
+                                                                        00207400
+      *----------------------------------------------------             00207500
+       1200-TESTE-VAZIO                           SECTION.              00207600
+      *----------------------------------------------------             00207700
+           READ FUNC.                                                   00207800
+           READ PROJ.                                                   00207900
+           DISPLAY FD-FUNC.                                             00208000
+           DISPLAY FD-PROJ.                                             00208100
+      *----------------------------------------------------             00208700
+       1200-99-FIM.                   EXIT.                             00208800
+      *----------------------------------------------------             00208900
+                                                                        00209500
+      *----------------------------------------------------             00209600
+       1300-ATUALIZA-FUNC                         SECTION.              00209700
+      *----------------------------------------------------             00209800
+           MOVE FD-IDFUNC TO WRK-ID-ATUAL.                              00209900
+           MOVE 0 TO WRK-FLAG.                                          00210000
+      *----------------------------------------------------             00210300
+       1300-99-FIM.                   EXIT.                             00210400
+      *----------------------------------------------------             00210500
+                                                                        00210600
+      *----------------------------------------------------             00210700
+       2000-PROCESSAR                            SECTION.               00210800
+      *----------------------------------------------------             00211000
+                                                                        00220000
+           EVALUATE TRUE                                                00303100
+              WHEN FD-IDFUNC LESS FD-PROJ-IDFUNC                        00303200
+                   IF WRK-FLAG EQUAL 0                                  00303300
+                      PERFORM 2200-MOVE-VAR-SEMPROJ                     00303400
+                      WRITE FD-SEMPROJ FROM WRK-SEMPROJ                 00303500
+                   END-IF                                               00303600
+                    READ FUNC                                           00303700
+                     PERFORM 1300-ATUALIZA-FUNC                         00303800
+                      PERFORM 2300-CHAVE-NAO-COMPAT                     00303900
+                                                                        00304700
+              WHEN FD-IDFUNC EQUAL FD-PROJ-IDFUNC                       00304800
+                   PERFORM 2100-MOVE-VAR-PROJ                           00304900
+                    WRITE FD-FUNPROJ FROM WRK-FUNPROJ                   00305000
+                     MOVE 1 TO WRK-FLAG                                 00305100
+                      READ PROJ                                         00305200
+                       IF WRK-FS-PROJ EQUAL 10                          00305300
+                          MOVE HIGH-VALUES TO FD-PROJ-IDFUNC            00305400
+                       END-IF                                           00305500
+                                                                        00305600
+              WHEN OTHER                                                00305700
+                   MOVE 'CHAVE NAO BATE' TO WRK-MSGERRO                 00305800
+                   DISPLAY WRK-MSGERRO FD-IDFUNC FD-NOMEFUNC            00305900
+                   GOBACK                                               00306000
+            END-EVALUATE.                                               00306100
+                                                                        00306200
+      *----------------------------------------------------             00306300
+       2000-99-FIM.             EXIT.                                   00306400
+      *----------------------------------------------------             00306500
+                                                                        00306600
+      *----------------------------------------------------             00306700
+       2100-MOVE-VAR-PROJ                        SECTION.               00306800
+                                                                        00306900
+           MOVE FD-IDFUNC       TO WRK-IDFUNC.                          00307000
+           MOVE FD-NOMEFUNC     TO WRK-NOMEFUNC.                        00307100
+           MOVE FD-PROJ-PROJETO TO WRK-PROJETO.                         00307200
+           MOVE FD-PROJ-QTHORAS TO WRK-QTHORAS.                         00307300
+                                                                        00307400
+       2100-99-FIM.        EXIT.                                        00307500
+      *----------------------------------------------------             00307600
+                                                                        00307700
+      *----------------------------------------------------             00307800
+       2200-MOVE-VAR-SEMPROJ                     SECTION.               00307900
+                                                                        00308000
+           MOVE FD-IDFUNC       TO WRK-SEM-IDFUNC.                      00308100
+           MOVE FD-NOMEFUNC     TO WRK-SEM-NOMEFUNC.                    00308200
+                                                                        00308300
+       2200-99-FIM.        EXIT.                                        00308400
+      *----------------------------------------------------             00308500
+                                                                        00308600
+      *----------------------------------------------------             00308700
+       2300-CHAVE-NAO-COMPAT                     SECTION.               00308800
+                                                                        00308900
+           IF WRK-FS-FUNC EQUAL 10                                      00309000
+              MOVE 'CHAVE(PROJETO) NAO ENCONTRADA'  TO WRK-MSGERRO      00309100
+              MOVE '2000'                           TO WRK-SECAO        00309200
+              MOVE WRK-FS-FUNC                      TO WRK-STATUS       00309300
+              PERFORM 9000-TRATA-ERROS                                  00309400
+              MOVE HIGH-VALUES TO FD-PROJ-IDFUNC                        00309500
+           END-IF.                                                      00309600
+                                                                        00309700
+       2300-99-FIM.    EXIT.                                            00309800
+      *----------------------------------------------------             00309900
+                                                                        00310000
+      *----------------------------------------------------             00310100
+       3000-FINALIZAR                            SECTION.               00310200
+      *----------------------------------------------------             00311000
+           PERFORM 3100-DISPLAY-FINAL.                                  00320000
+           PERFORM 3200-FECHAR.                                         00330000
+                                                                        00340000
+      *----------------------------------------------------             00341000
+       3100-DISPLAY-FINAL                        SECTION.               00342000
+           DISPLAY  WRK-LINBRANC.                                       00343000
+           DISPLAY  WRK-FIM-REL.                                        00347000
+       3100-99-FIM.         EXIT.                                       00347100
+      *----------------------------------------------------             00347200
+                                                                        00347300
+      *----------------------------------------------------             00347400
+       3200-FECHAR                               SECTION.               00347500
+           CLOSE FUNC PROJ FUNPROJ.                                     00347600
+       3200-99-FIM.         EXIT.                                       00347700
+      *----------------------------------------------------             00347800
+                                                                        00347900
+      *----------------------------------------------------             00348000
+       3000-99-FIM.             EXIT.                                   00349000
+      *----------------------------------------------------             00350000
+                                                                        00360000
+                                                                        00361000
+      *----------------------------------------------------             00362000
+       4000-TESTE-STATUS                         SECTION.               00362100
+      *----------------------------------------------------             00362200
+           PERFORM 4100-STATUS-FUNC.                                    00362300
+           PERFORM 4200-STATUS-PROJ.                                    00362400
+           PERFORM 4300-STATUS-FUNPROJ.                                 00362500
+           PERFORM 4400-STATUS-SEMPROJ.                                 00362600
+      *----------------------------------------------------             00362700
+       4000-99-FIM.               EXIT.                                 00362800
+      *----------------------------------------------------             00362900
+                                                                        00363000
+      *----------------------------------------------------             00363100
+       4100-STATUS-FUNC                          SECTION.               00363200
+           IF WRK-FS-FUNC NOT EQUAL ZEROES                              00364000
+              MOVE '1100'              TO WRK-SECAO                     00365000
+              MOVE 'ERRO NO OPEN FUNC' TO WRK-MSGERRO                   00365100
+              MOVE WRK-FS-FUNC         TO WRK-STATUS                    00365200
+              PERFORM 9000-TRATA-ERROS                                  00365300
+           END-IF.                                                      00365400
+       4100-99-FIM.    EXIT.                                            00365500
+      *----------------------------------------------------             00365600
+                                                                        00365700
+      *----------------------------------------------------             00365800
+       4200-STATUS-PROJ                          SECTION.               00365900
+           IF WRK-FS-PROJ NOT EQUAL ZEROES                              00366000
+              MOVE '1100'              TO WRK-SECAO                     00366100
+              MOVE 'ERRO NO OPEN PROJ' TO WRK-MSGERRO                   00366200
+              MOVE WRK-FS-PROJ         TO WRK-STATUS                    00366300
+              PERFORM 9000-TRATA-ERROS                                  00366400
+           END-IF.                                                      00366500
+       4200-99-FIM.    EXIT.                                            00366600
+      *----------------------------------------------------             00366700
+                                                                        00366800
+      *----------------------------------------------------             00366900
+       4300-STATUS-FUNPROJ                       SECTION.               00367000
+           IF WRK-FS-FUNPROJ NOT EQUAL ZEROES                           00367100
+              MOVE '1100'                 TO WRK-SECAO                  00367200
+              MOVE 'ERRO NO OPEN FUNPROJ' TO WRK-MSGERRO                00367300
+              MOVE WRK-FS-FUNPROJ         TO WRK-STATUS                 00367400
+              PERFORM 9000-TRATA-ERROS                                  00367500
+           END-IF.                                                      00367600
+       4300-99-FIM.    EXIT.                                            00367700
+      *----------------------------------------------------             00367800
+                                                                        00367900
+      *----------------------------------------------------             00368000
+       4400-STATUS-SEMPROJ                       SECTION.               00368100
+           IF WRK-FS-SEMPROJ NOT EQUAL ZEROES                           00368200
+              MOVE '1100'                 TO WRK-SECAO                  00368300
+              MOVE 'ERRO NO OPEN FUNPROJ' TO WRK-MSGERRO                00368400
+              MOVE WRK-FS-FUNPROJ         TO WRK-STATUS                 00368500
+              PERFORM 9000-TRATA-ERROS                                  00368600
+           END-IF.                                                      00368700
+       4400-99-FIM.    EXIT.                                            00368800
+      *----------------------------------------------------             00368900
+                                                                        00369000
+      *----------------------------------------------------             00369100
+       9000-TRATA-ERROS                          SECTION.               00369200
+      *----------------------------------------------------             00369300
+           MOVE 'FR18EX02' TO WRK-PROGRAMA.                             00369400
+           CALL WRK-GRAVALOG USING WRK-DADOS.                           00370000
+           GOBACK.                                                      00380000
+      *----------------------------------------------------             00390000
+       9000-99-FIM.             EXIT.                                   00400000
+      *----------------------------------------------------             00410000

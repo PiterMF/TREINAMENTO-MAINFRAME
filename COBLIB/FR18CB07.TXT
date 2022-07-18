@@ -1,0 +1,46 @@
+      *================================================================*00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *================================================================*00030000
+       PROGRAM-ID. FR18CB07.                                            00040000
+                                                                        00050000
+      *=========================================================*       00060000
+      *  INSTRUTOR  : IVAN SANCHES                              *       00070002
+      *  AUTOR      : PITER FANTI                               *       00090000
+      *  EMPRESA    : FOURSYS                                   *       00091000
+      *---------------------------------------------------------*       00092000
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00093000
+      *   1.0   17/05/22  PITER FANTI    VERSAO INICIAL         *       00094000
+      *---------------------------------------------------------*       00095000
+      *  OBJETIVO   : PROGRAMA ACEITA DADOS DA SYSIN E IMPRIME  *       00096000
+      *               DADOS E TAMBEM VARIAVEL COM REDEFINES COM *       00097001
+      *               QUEBRA DO ENDERECO EM RUA, BAIRRO E ESTADO*       00098001
+      *=========================================================*       00100001
+                                                                        00100101
+      *================================================================*00101000
+       ENVIRONMENT                               DIVISION.              00102000
+      *================================================================*00103000
+                                                                        00104000
+      *================================================================*00105000
+       DATA                                      DIVISION.              00106000
+      *================================================================*00107000
+       WORKING-STORAGE                           SECTION.               00108000
+       01 WRK-DADOS.                                                    00109000
+          05 WRK-ID              PIC 9(05)  VALUE ZEROES.               00109100
+          05 WRK-NOME            PIC X(19)  VALUE SPACES.               00109200
+          05 WRK-ENDERECO        PIC X(40)  VALUE SPACES.               00109300
+                                                                        00109400
+       01 WRK-END-RED            REDEFINES  WRK-DADOS.                  00109500
+          05 FILLER              PIC X(24).                             00109700
+          05 WRK-ENDERECO-RED.                                          00109800
+             10 WRK-RUA-RED      PIC X(21).                             00109900
+             10 WRK-BAIRRO-RED   PIC X(11).                             00110000
+             10 WRK-ESTADO-RED   PIC X(14).                             00110100
+      *0001DENISE AVILAR      RUA TITO         1175LAPA       SAO  PAULO00110200
+      *================================================================*00110900
+       PROCEDURE                                 DIVISION.              00111000
+      *================================================================*00111100
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00111200
+           DISPLAY 'WRK-DADOS........' WRK-DADOS.                       00111300
+           DISPLAY 'WRK-ENDERECO-RED.' WRK-ENDERECO-RED.                00111400
+           DISPLAY 'WRK-BAIRRO-RED...' WRK-BAIRRO-RED.                  00111500
+           STOP RUN.                                                    00111700

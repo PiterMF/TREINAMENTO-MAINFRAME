@@ -1,0 +1,161 @@
+      *==================================================               00001000
+       IDENTIFICATION DIVISION.                                         00002000
+      *==================================================               00003000
+                                                                        00004000
+       PROGRAM-ID. F18CI98.                                             00005000
+                                                                        00006000
+      *==========================================================*      00007000
+      *  INSTRUTOR  : IVAN SANCHES                               *      00008000
+      *  AUTOR      : PITER FANTI                                *      00009000
+      *  EMPRESA    : FOURSYS                                    *      00010000
+      *----------------------------------------------------------*      00020000
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO  *      00020100
+      *   1.0   28/06/22  PITER FANTI  VERSAO INICIAL            *      00020200
+      *   1.1   29/06/22  PITER FANTI  CORRECAO DE BUGS E ADICAO *      00020300
+      *                                DE SAIDA NO PRIMEIRO      *      00020400
+      *                                COMANDO(PSEUDOCOMUNICACAO)*      00020500
+      *                                -REGISTRO DE PROG ALTERADO*      00020600
+      *                                (F19CIP2)                 *      00020700
+      *----------------------------------------------------------*      00020800
+      *  OBJETIVO   : PROGRAMA DE LEITURA DO MAPA F18CIM1 PELO   *      00020900
+      *               VSAM                                       *      00021000
+      *==========================================================*      00021100
+                                                                        00021200
+      *==================================================               00021300
+       DATA DIVISION.                                                   00021400
+      *==================================================               00021500
+       WORKING-STORAGE SECTION.                                         00021600
+      *==================================================               00021700
+                                                                        00021800
+           COPY F18CIM1.                                                00021900
+            COPY DFHAID.                                                00022000
+                                                                        00022100
+      *-------------------------------------------                      00022200
+       01 FILLER PIC X(70)                                              00023000
+              VALUE 'VARIAVEL DE RECEBIMENTO DE DADOS'.                 00024000
+      *-------------------------------------------                      00025000
+       01 WRK-DADOS.                                                    00026000
+          05 WRK-CHAVE    PIC X(05).                                    00027000
+          05 WRK-NOME     PIC X(30).                                    00028000
+          05 WRK-SETOR    PIC X(04).                                    00029000
+          05 WRK-SALARIO  PIC X(10).                                    00030000
+          05 WRK-DATADIA  PIC X(02).                                    00040000
+          05 FILLER       PIC X(01) VALUE '/'.                          00041000
+          05 WRK-DATAMES  PIC X(02).                                    00042000
+          05 FILLER       PIC X(01) VALUE '/'.                          00043000
+          05 WRK-DATAANO  PIC X(04).                                    00044000
+          05 WRK-EMAIL    PIC X(40).                                    00045000
+                                                                        00046000
+      *----------------------------------------------                   00047000
+       01 FILLER PIC X(70)                                              00048000
+              VALUE 'VARIAVEIS DE STATUS E FLAG'.                       00049000
+      *----------------------------------------------                   00050000
+       77 WRK-RESP        PIC S9(04) COMP.                              00051000
+       77 WRK-RET-MAPA    PIC S9(04) COMP.                              00051100
+       77 WRK-FLAG        PIC  9(01).                                   00051200
+       77 WRK-SAIDA       PIC  X(30) VALUE '-----FIM-----'.             00051300
+       77 WRK-FASE        PIC  9(01).                                   00051400
+                                                                        00051500
+      *==================================================               00051600
+       PROCEDURE                         DIVISION.                      00051700
+      *==================================================               00051800
+                                                                        00051900
+      *----------------------------------------------------             00052000
+       0000-PRINCIPAL                            SECTION.               00053000
+      *----------------------------------------------------             00054000
+           PERFORM 1000-INICIAR.                                        00055000
+           IF EIBCALEN NOT EQUAL 1                                      00056000
+              PERFORM 2000-PROCESSAR                                    00057000
+           END-IF.                                                      00058000
+            EXEC CICS                                                   00059000
+              RETURN TRANSID ('T182')                                   00060000
+              COMMAREA(WRK-FASE)                                        00070000
+            END-EXEC.                                                   00071000
+      *-----------------------------------------------------            00072000
+       0000-99-FIM.       EXIT.                                         00073000
+      *-----------------------------------------------------            00074000
+                                                                        00075000
+      *----------------------------------------------------             00076000
+       1000-INICIAR                              SECTION.               00077000
+      *----------------------------------------------------             00078000
+            IF EIBCALEN EQUAL 0                                         00079000
+               EXEC CICS SEND                                           00079100
+                  MAPSET('F18CIM1')                                     00079200
+                  MAP('MAPA01')                                         00079300
+                  ERASE                                                 00079400
+                  MAPONLY                                               00079500
+               END-EXEC                                                 00079600
+               MOVE 1 TO WRK-FASE                                       00079700
+            END-IF.                                                     00079800
+                                                                        00079900
+      *-----------------------------------------------------            00080000
+       1000-99-FIM.       EXIT.                                         00090000
+      *-----------------------------------------------------            00090100
+                                                                        00090200
+      *----------------------------------------------------             00090300
+       2000-PROCESSAR                            SECTION.               00090400
+      *----------------------------------------------------             00090500
+                                                                        00090600
+            EXEC CICS RECEIVE                                           00090700
+               MAPSET('F18CIM1')                                        00090800
+               MAP('MAPA01')                                            00090900
+               INTO(MAPA01I)                                            00091000
+               RESP(WRK-RET-MAPA)                                       00092000
+            END-EXEC.                                                   00093000
+                                                                        00094000
+             IF EIBAID = DFHPF10                                        00095000
+                 EXEC CICS SEND                                         00096000
+                   FROM(WRK-SAIDA)                                      00097000
+                   ERASE                                                00098000
+                 END-EXEC                                               00099000
+                                                                        00100000
+                 EXEC CICS                                              00110000
+                   RETURN                                               00120000
+                 END-EXEC                                               00130000
+             END-IF.                                                    00131000
+                                                                        00132000
+             IF EIBAID = DFHENTER                                       00133000
+                INITIALIZE MAPA01O REPLACING ALPHANUMERIC BY SPACES     00133100
+                                             NUMERIC      BY ZEROES     00133200
+                MOVE ZEROES TO IDO                                      00133300
+             END-IF.                                                    00133400
+                                                                        00133500
+             IF EIBAID = DFHPF5                                         00133600
+                MOVE IDI TO WRK-CHAVE                                   00133700
+                   EXEC CICS READ                                       00133800
+                             FILE ('FUNC')                              00133900
+                             RIDFLD(WRK-CHAVE)                          00134000
+                             INTO(WRK-DADOS)                            00134100
+                             RESP(WRK-RESP)                             00134200
+                   END-EXEC                                             00134300
+                                                                        00134400
+                     IF WRK-RESP EQUAL DFHRESP(NORMAL)                  00134500
+                          MOVE WRK-NOME      TO NOMEO                   00134600
+                          MOVE WRK-SETOR     TO SETORO                  00134700
+                          MOVE WRK-SALARIO   TO SALARIOO                00134800
+                          MOVE WRK-DATADIA   TO DATADIAO                00134900
+                          MOVE WRK-DATAMES   TO DATAMESO                00135000
+                          MOVE WRK-DATAANO   TO DATAANOO                00135100
+                          MOVE WRK-EMAIL     TO EMAILO                  00135200
+                          IF WRK-SALARIO EQUAL ZEROES OR                00135300
+                             WRK-SALARIO IS NOT NUMERIC                 00135400
+                             MOVE 'ENCONTRADO- SALARIO INCOERENTE'      00135500
+                                   TO MSGO                              00135600
+                          ELSE                                          00135700
+                             MOVE 'ENCONTRADO'  TO MSGO                 00135800
+                          END-IF                                        00135900
+                     END-IF                                             00136000
+                     IF WRK-RESP EQUAL DFHRESP(NOTFND)                  00136100
+                          MOVE 'NAO EXISTE ' TO MSGO                    00136200
+                     END-IF                                             00136300
+             END-IF.                                                    00136400
+                                                                        00136500
+                EXEC CICS SEND                                          00136600
+                   MAPSET('F18CIM1')                                    00136700
+                   MAP('MAPA01')                                        00136800
+                   FROM(MAPA01O)                                        00136900
+                   DATAONLY                                             00137000
+                END-EXEC.                                               00138000
+      *-----------------------------------------------------            00139000
+       2000-99-FIM.       EXIT.                                         00140000
+      *-----------------------------------------------------            00150000

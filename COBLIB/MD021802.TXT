@@ -1,0 +1,304 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00031000
+       PROGRAM-ID. MD021802.                                            00032000
+                                                                        00033000
+      *=========================================================*       00034000
+      *  AUTOR      : PITER FANTI                               *       00034100
+      *  INSTRUTOR  : IVAN SANCHES                              *       00034200
+      *  EMPRESA    : FOURSYS                                   *       00034300
+      *---------------------------------------------------------*       00034400
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00034500
+      *   1.0   06/07/22  PITER FANTI    VERSAO INICIAL         *       00034600
+      *---------------------------------------------------------*       00034700
+      *  OBJETIVO   : LER A OPERACAO DESEJADA E CHAVE NO JCL DE *       00034800
+      *               EXECUCAO (USO DO PARM) E REALIZAR NO AR-  *       00034900
+      *               QUIVO VSAM EVSA0407 (LEITURA, GRAVACAO,   *       00035002
+      *               REWRITE E DELETE: L,G,R,D)                *       00035102
+      *---------------------------------------------------------*       00035500
+      *  ARQUIVOS   :                                           *       00035600
+      *   DDNAME          I/O                INCLUDE/BOOK       *       00035700
+      *   EVSA0407        I-O                  I#BV0407         *       00035800
+      *---------------------------------------------------------*       00036100
+      *  MODULOS    :                        INCLUDE/BOOK       *       00036200
+      *   GRAVALOG         I                    #GLOGPT         *       00036300
+      *---------------------------------------------------------*       00036423
+4SYS18*                  A L T E R A C O E S                    *       00036530
+      *---------------------------------------------------------*       00036630
+4SYS18* ANALISTA......:PITER MALHEIROS FANTI        4SYS18      *       00036730
+4SYS18* DATA..........:08/07/2020                               *       00036830
+      *---------------------------------------------------------*       00036930
+4SYS18* OBJETIVO......:IMPLEMENTACAO DE TRATAMENTO DE SALARIO   *       00037030
+  .   *                (ZEROS OU NAO NUMERICO) E TRATAMENTO DE  *       00037131
+  .   *                CHAVE PELO PARM (TAMANHO 10 PARA L/D  E  *       00037231
+4SYS18*                TAMANHO 20 PARA G/R)                     *       00037330
+      *=========================================================*       00037400
+                                                                        00037500
+      *====================================================             00037600
+       ENVIRONMENT                               DIVISION.              00037700
+      *====================================================             00037800
+       INPUT-OUTPUT                              SECTION.               00037900
+       FILE-CONTROL.                                                    00038000
+           SELECT EVSA0407 ASSIGN TO EVSA0407                           00038100
+               ORGANIZATION IS INDEXED                                  00038200
+               ACCESS MODE  IS DYNAMIC                                  00038300
+               RECORD KEY   IS EVSA-CHAVE                               00038400
+               FILE STATUS  IS WRK-FS-EVSA0407.                         00038500
+                                                                        00039000
+      *====================================================             00041000
+       DATA                                      DIVISION.              00042000
+      *====================================================             00043000
+       FILE                                    SECTION.                 00044000
+       FD EVSA0407.                                                     00045000
+                                                                        00046000
+      *-------LRECL19-----------                                        00047000
+       01 FD-EVSA0407.                                                  00048000
+          05 EVSA-CHAVE.                                                00049000
+             10 EVSA-AGENCIA PIC X(04).                                 00050000
+             10 EVSA-CONTA   PIC X(05).                                 00060000
+          05 EVSA-SALARIO    PIC X(10).                                 00070000
+                                                                        00080000
+                                                                        00100000
+      *----------------------------------------------------             00155000
+       WORKING-STORAGE                         SECTION.                 00156000
+      *----------------------------------------------------             00157000
+                                                                        00158000
+                                                                        00161300
+      *------------------------------                                   00161400
+       01 FILLER PIC X(30) VALUE 'AREA DE LOG DE ERROS'.                00161500
+      *------------------------------                                   00161600
+      *------LRECL-------------                                         00161700
+           COPY '#GLOGPT'.                                              00161800
+                                                                        00181400
+      *------------------------------                                   00181500
+       01 FILLER PIC X(30) VALUE 'AREA DE DISPLAY'.                     00181600
+      *------------------------------                                   00181700
+       01 WRK-FINAL-REL.                                                00181800
+          05 FILLER PIC X(37) VALUE                                     00181900
+                  '-------FINAL DO PROCESSAMENTO-------'.               00182000
+                                                                        00183000
+       77 WRK-LINBRANC    PIC X(47) VALUE SPACES.                       00184000
+                                                                        00185000
+      *---------------------------------                                00186000
+       77 FILLER PIC X(20) VALUE 'AREA DE STATUS'.                      00187000
+      *---------------------------------                                00187100
+       77 WRK-FS-EVSA0407 PIC 9(02).                                    00187200
+                                                                        00187500
+      *-------LOG-DE-ERROS-------------                                 00191000
+      *77 WRK-GRAVALOG PIC X(08) VALUE 'GRAVALOG'.                      00191101
+                                                                        00191200
+      *-------LENGTH LINKAGE---------                                   00191301
+       77 WRK-LEN      PIC 9(04).                                       00191401
+                                                                        00191501
+      *----------------------------------------------------             00191602
+       LINKAGE                                   SECTION.               00191701
+      *----------------------------------------------------             00191802
+       01 LNK-ENTRADA.                                                  00191901
+          05 LNK-LEN      PIC 9(04) COMP.                               00192001
+          05 LNK-CORPO.                                                 00192101
+             10 LNK-OPER  PIC X(01).                                    00192201
+             10 LNK-CHAVE.                                              00192301
+                15 LNK-AGENCIA PIC X(04).                               00192402
+                15 LNK-CONTA   PIC X(05).                               00192502
+             10 LNK-SALARIO    PIC X(10).                               00192602
+                                                                        00192702
+      *====================================================             00192802
+       PROCEDURE DIVISION USING LNK-ENTRADA.                            00192903
+      *====================================================             00193002
+                                                                        00193102
+      *----------------------------------------------------             00193202
+       0000-PRINCIPAL                            SECTION.               00193302
+      *----------------------------------------------------             00193402
+           PERFORM 1000-INICIAR.                                        00193502
+           PERFORM 2000-PROCESSAR.                                      00193702
+           PERFORM 3000-FINALIZAR.                                      00193802
+                                                                        00193902
+           STOP RUN.                                                    00194002
+      *----------------------------------------------------             00194102
+       0000-99-FIM.                       EXIT.                         00194202
+      *----------------------------------------------------             00194302
+                                                                        00194402
+      *----------------------------------------------------             00194502
+       1000-INICIAR                              SECTION.               00194602
+      *----------------------------------------------------             00194702
+           PERFORM 1100-ABRIR-ARQUIVOS.                                 00194802
+           PERFORM 4000-TESTE-STATUS.                                   00194902
+      *----------------------------------------------------             00195002
+       1000-99-FIM.             EXIT.                                   00195102
+      *----------------------------------------------------             00195202
+                                                                        00195302
+      *----------------------------------------------------             00195402
+       1100-ABRIR-ARQUIVOS                       SECTION.               00195502
+           OPEN I-O EVSA0407.                                           00195702
+       1100-99-FIM.                   EXIT.                             00195802
+      *----------------------------------------------------             00195902
+                                                                        00198000
+      *----------------------------------------------------             00198130
+4SYS18 1200-VERIFICA-L-D                         SECTION.               00198230
+  .         IF LNK-LEN  LESS 10                                         00198331
+  .            DISPLAY 'TAMANHO INVALIDO DE CHAVE: '                    00198431
+  .            DISPLAY 'AAAACCCCC'                                      00198531
+  .            DISPLAY LNK-CHAVE                                        00198631
+  .            PERFORM 3000-FINALIZAR                                   00198731
+  .            GOBACK                                                   00198831
+  .            MOVE LNK-CHAVE TO EVSA-CHAVE                             00198931
+  .         END-IF.                                                     00199031
+4SYS18 1200-99-FIM.                   EXIT.                             00199130
+      *----------------------------------------------------             00199230
+                                                                        00199324
+      *----------------------------------------------------             00199430
+4SYS18 1300-VERIFICA-G-R                         SECTION.               00199530
+  .         IF LNK-LEN  LESS 20                                         00199631
+  .            DISPLAY 'TAMANHO INVALIDO DE ENTRADA: '                  00199731
+  .            DISPLAY 'AAAACCCCCSSSSSSSSSS'                            00199831
+  .            DISPLAY LNK-CHAVE LNK-SALARIO                            00199931
+  .            PERFORM 3000-FINALIZAR                                   00200031
+  .            GOBACK                                                   00200131
+  .         ELSE                                                        00200231
+  .            MOVE LNK-CHAVE TO EVSA-CHAVE                             00200331
+  .         END-IF.                                                     00200431
+4SYS18 1300-99-FIM.                   EXIT.                             00200530
+      *----------------------------------------------------             00200630
+                                                                        00201024
+      *----------------------------------------------------             00204700
+       2000-PROCESSAR                            SECTION.               00204800
+      *----------------------------------------------------             00204900
+                                                                        00206224
+            EVALUATE LNK-OPER                                           00206324
+               WHEN 'L'                                                 00206424
+                    PERFORM 2200-LEITURA                                00206524
+               WHEN 'G'                                                 00206624
+                    PERFORM 2300-GRAVACAO                               00206724
+               WHEN 'D'                                                 00206824
+                    PERFORM 2400-DELECAO                                00206924
+               WHEN 'R'                                                 00207024
+                    PERFORM 2500-REGRAVACAO                             00207124
+               WHEN OTHER                                               00207224
+                    DISPLAY 'OPERACAO INVALIDA'                         00207324
+                    PERFORM 3000-FINALIZAR                              00207424
+                    GOBACK                                              00207524
+               END-EVALUATE.                                            00208002
+      *----------------------------------------------------             00210000
+       2000-99-FIM.             EXIT.                                   00211000
+      *----------------------------------------------------             00212000
+                                                                        00213000
+                                                                        00240000
+      *----------------------------------------------------             00241002
+       2200-LEITURA                               SECTION.              00242002
+4SYS18      PERFORM 1200-VERIFICA-L-D.                                  00242130
+            READ EVSA0407.                                              00243008
+            IF WRK-FS-EVSA0407 EQUAL ZEROES                             00244008
+               DISPLAY 'REGISTRO ENCONTRADO: ' FD-EVSA0407              00244118
+            ELSE                                                        00244208
+               MOVE    'REGISTRO NAO ENCONTRADO' TO WRK-MSGERRO         00245008
+               DISPLAY WRK-MSGERRO                                      00246008
+               DISPLAY 'CODIGO VSAM: ' WRK-FS-EVSA0407                  00247008
+4SYS18         PERFORM 3000-FINALIZAR                                   00247130
+4SYS18         GOBACK                                                   00248030
+            END-IF.                                                     00249008
+       2200-99-FIM.                   EXIT.                             00249102
+      *----------------------------------------------------             00249202
+                                                                        00250000
+      *----------------------------------------------------             00251004
+       2300-GRAVACAO                              SECTION.              00252004
+4SYS18      PERFORM 1300-VERIFICA-G-R.                                  00252130
+4SYS18      PERFORM 2600-VERIFICA-SALARIO.                              00253030
+            WRITE FD-EVSA0407.                                          00255008
+            IF WRK-FS-EVSA0407 EQUAL ZEROES                             00256008
+               DISPLAY 'REGISTRO GRAVADO: ' FD-EVSA0407                 00257014
+            ELSE                                                        00258008
+               MOVE    'REGISTRO NAO GRAVADO' TO WRK-MSGERRO            00259008
+               DISPLAY WRK-MSGERRO                                      00259108
+               DISPLAY 'CODIGO VSAM: ' WRK-FS-EVSA0407                  00259208
+4SYS18         PERFORM 3000-FINALIZAR                                   00259330
+4SYS18         GOBACK                                                   00259430
+            END-IF.                                                     00259508
+       2300-99-FIM.                   EXIT.                             00259605
+      *----------------------------------------------------             00259704
+                                                                        00259804
+      *----------------------------------------------------             00259905
+       2400-DELECAO                               SECTION.              00260005
+4SYS18      PERFORM 1200-VERIFICA-L-D.                                  00260130
+            DELETE EVSA0407 RECORD                                      00260508
+               INVALID KEY DISPLAY 'CHAVE INVALIDA' EVSA-CHAVE          00260609
+4SYS18                     PERFORM 3000-FINALIZAR                       00260730
+4SYS18                     GOBACK                                       00260830
+               NOT INVALID KEY                                          00261007
+                           DISPLAY 'REGISTRO DELETADO: ' FD-EVSA0407    00261107
+            END-DELETE.                                                 00261207
+       2400-99-FIM.                   EXIT.                             00261605
+      *----------------------------------------------------             00261705
+                                                                        00261805
+      *----------------------------------------------------             00261909
+       2500-REGRAVACAO                            SECTION.              00262009
+4SYS18      PERFORM 1300-VERIFICA-G-R.                                  00262130
+4SYS18      PERFORM 2600-VERIFICA-SALARIO.                              00262230
+            REWRITE FD-EVSA0407                                         00262312
+               INVALID KEY DISPLAY 'CHAVE INVALIDA' EVSA-CHAVE          00262409
+4SYS18                     PERFORM 3000-FINALIZAR                       00262530
+4SYS18                     GOBACK                                       00262730
+               NOT INVALID KEY                                          00262809
+                           DISPLAY 'REGISTRO REGRAVADO: ' FD-EVSA0407   00262909
+            END-REWRITE.                                                00263010
+       2500-99-FIM.                   EXIT.                             00263109
+      *----------------------------------------------------             00263209
+                                                                        00263309
+      *----------------------------------------------------             00263430
+4SYS18 2600-VERIFICA-SALARIO                      SECTION.              00263530
+  .         IF LNK-SALARIO EQUAL ZEROES                                 00263731
+  .            OR LNK-SALARIO IS NOT NUMERIC                            00263831
+  .            DISPLAY 'SALARIO INCONSISTENTE: ' LNK-SALARIO            00263931
+  .            PERFORM 3000-FINALIZAR                                   00264031
+  .            GOBACK                                                   00264131
+  .         ELSE                                                        00264231
+  .            MOVE LNK-SALARIO TO EVSA-SALARIO                         00264331
+  .         END-IF.                                                     00264431
+4SYS18 2600-99-FIM.                   EXIT.                             00264530
+      *----------------------------------------------------             00264630
+                                                                        00264714
+      *----------------------------------------------------             00265014
+       3000-FINALIZAR                            SECTION.               00270000
+      *----------------------------------------------------             00280000
+           PERFORM 3100-DISPLAY-FINAL.                                  00290000
+           PERFORM 3200-FECHAR.                                         00300000
+      *----------------------------------------------------             00310000
+       3000-99-FIM.             EXIT.                                   00311000
+      *----------------------------------------------------             00312000
+                                                                        00313000
+      *----------------------------------------------------             00314000
+       3100-DISPLAY-FINAL                        SECTION.               00315000
+           DISPLAY WRK-LINBRANC.                                        00316600
+           DISPLAY WRK-FINAL-REL.                                       00316700
+       3100-99-FIM.         EXIT.                                       00316800
+      *----------------------------------------------------             00316900
+                                                                        00317000
+      *----------------------------------------------------             00318000
+       3200-FECHAR                               SECTION.               00319000
+           CLOSE EVSA0407.                                              00320002
+       3200-99-FIM.         EXIT.                                       00330000
+      *----------------------------------------------------             00340000
+                                                                        00343000
+      *----------------------------------------------------             00347700
+       4000-TESTE-STATUS                         SECTION.               00347802
+           IF WRK-FS-EVSA0407 NOT EQUAL ZEROES                          00347900
+              MOVE '1100'                  TO WRK-SECAO                 00348000
+              MOVE 'ERRO NO OPEN EVSA0407' TO WRK-MSGERRO               00349000
+              MOVE WRK-FS-EVSA0407         TO WRK-STATUS                00350000
+              PERFORM 9000-TRATA-ERROS                                  00360000
+           END-IF.                                                      00361000
+       4000-99-FIM.    EXIT.                                            00362002
+      *----------------------------------------------------             00362100
+                                                                        00366200
+      *----------------------------------------------------             00366300
+       9000-TRATA-ERROS                          SECTION.               00366400
+      *----------------------------------------------------             00366500
+           MOVE 'MD021802' TO WRK-PROGRAMA.                             00366602
+           DISPLAY WRK-MSGERRO.                                         00366700
+           DISPLAY 'CODIGO VSAM: ' WRK-FS-EVSA0407.                     00366800
+           DISPLAY WRK-FINAL-REL.                                       00366900
+      *    CALL WRK-GRAVALOG USING WRK-DADOS.                           00367000
+           GOBACK.                                                      00368000
+      *----------------------------------------------------             00369000
+       9000-99-FIM.             EXIT.                                   00369100
+      *----------------------------------------------------             00369200

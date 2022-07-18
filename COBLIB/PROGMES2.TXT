@@ -1,0 +1,73 @@
+       IDENTIFICATION DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       PROGRAM-ID. PROGTEST.
+       ENVIRONMENT DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       CONFIGURATION SECTION.
+      *-----------------------
+       INPUT-OUTPUT SECTION.
+      *-----------------------
+       DATA DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       FILE SECTION.
+      *-----------------------
+       WORKING-STORAGE SECTION.
+       01 WRK-DATA.
+          05 WRK-MES     PIC 9(02) VALUE ZEROES.
+          05 WRK-VALOR   PIC 9(05) VALUE ZEROES.
+
+       01 FILLER.
+          05 WRK-MESES  PIC 9(06) OCCURS 12 TIMES.
+
+
+       77 WRK-SOMVEND    PIC 9(07) VALUE ZEROES.
+       77 WRK-CONT       PIC 9(02) VALUE ZEROES.
+       77 WRK-CONTMES    PIC 9(02) VALUE ZEROES.
+
+      *-----------------------
+       PROCEDURE DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       0000-PRINCIPAL             SECTION.
+            PERFORM 1000-INICIAR.
+            PERFORM 2000-PROCESSAR UNTIL WRK-MES EQUAL 99.
+            PERFORM 3000-FINALIZAR.
+
+            STOP RUN.
+      *-----------------------------------
+       1000-INICIAR               SECTION.
+      *-----------------------------------
+            ACCEPT WRK-DATA.
+                IF WRK-MES LESS 01
+                    DISPLAY 'FINAL DO PROGRAMA'
+                    STOP RUN
+                END-IF.
+
+      *-----------------------------------
+       2000-PROCESSAR             SECTION.
+      *-----------------------------------
+            ADD WRK-VALOR TO WRK-SOMVEND.
+            ADD 1 TO WRK-CONT.
+
+            ADD WRK-VALOR TO WRK-MESES(WRK-MES).
+
+            ACCEPT WRK-DATA.
+                IF WRK-MES EQUAL 00
+                    PERFORM 3000-FINALIZAR
+                END-IF.
+      *-----------------------------------
+       3000-FINALIZAR             SECTION.
+      *-----------------------------------
+
+            PERFORM 3100-DISPLAY-MES.
+
+            DISPLAY 'REGISTROS LIDOS: ' WRK-CONT.
+            DISPLAY 'TOTAL DAS VENDAS: '    WRK-SOMVEND.
+
+       3100-DISPLAY-MES           SECTION.
+            PERFORM VARYING WRK-CONTMES FROM 1 BY 1
+                                        UNTIL WRK-CONTMES GREATER 12
+                DISPLAY WRK-CONTMES ' -> ' WRK-MESES(WRK-CONTMES)
+            END-PERFORM.
+      *-----------------------------------
+       9000-TRATA-ERROS           SECTION.
+      *-----------------------------------

@@ -1,0 +1,46 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+       PROGRAM-ID. FR18CB15.                                            00040000
+                                                                        00050000
+      *=====================================================            00060000
+      *  AUTOR: PITER FANTI                                             00070000
+      *  EMPRESA: FOURSYS                                               00080000
+      *=====================================================            00090000
+                                                                        00100000
+      *====================================================             00101000
+       ENVIRONMENT                               DIVISION.              00102000
+      *====================================================             00103000
+       CONFIGURATION                             SECTION.               00103100
+       SPECIAL-NAMES.                                                   00103200
+           DECIMAL-POINT IS COMMA.                                      00103300
+                                                                        00103400
+      *====================================================             00103500
+       DATA                                      DIVISION.              00103600
+      *====================================================             00103700
+       WORKING-STORAGE                         SECTION.                 00103800
+       01 WRK-DADOS.                                                    00103900
+          05 WRK-COD       PIC 9(03)              VALUE ZEROES.         00104002
+          05 WRK-PROD      PIC X(30)              VALUE SPACES.         00105002
+          05 WRK-QNTVEND   PIC 9(03)              VALUE ZEROES.         00106003
+          05 WRK-VALUNIT   PIC 9(05)V99           VALUE ZEROES.         00106103
+                                                                        00106203
+       77 WRK-MEDIADIA     PIC 9(07)V99           VALUE ZEROES.         00108103
+       77 WRK-MEDIADIA-ED  PIC $Z.ZZZ.ZZ9,99.                           00108201
+                                                                        00108303
+       77 WRK-VALUNIT-ED   PIC $ZZ.ZZ9,99.                              00108402
+                                                                        00108503
+      *001RACAO CACHORRO AU-UAU 2,50 KG 0240013499                      00108604
+      *====================================================             00108700
+       PROCEDURE                                 DIVISION.              00108800
+      *====================================================             00108900
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00109000
+           DISPLAY 'CODIGO DO PRODUTO........' WRK-COD.                 00109101
+           DISPLAY 'NOME DO PRODUTO..........' WRK-PROD.                00109201
+           DISPLAY 'QUANTIDADE VENDIDA.......' WRK-QNTVEND.             00109301
+           COMPUTE WRK-MEDIADIA = ( WRK-QNTVEND * WRK-VALUNIT ) / 5.    00109403
+           MOVE WRK-MEDIADIA TO WRK-MEDIADIA-ED.                        00109501
+           MOVE WRK-VALUNIT  TO WRK-VALUNIT-ED.                         00109601
+           DISPLAY 'VALOR UNITARIO...........' WRK-VALUNIT-ED.          00109701
+           DISPLAY 'MEDIA DE VENDAS POR DIA..' WRK-MEDIADIA-ED.         00109801
+           STOP RUN.                                                    00109900

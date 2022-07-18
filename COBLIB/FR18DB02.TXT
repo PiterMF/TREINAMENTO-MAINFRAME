@@ -1,0 +1,181 @@
+      *====================================================             00010001
+       IDENTIFICATION                            DIVISION.              00020001
+      *====================================================             00030001
+                                                                        00031001
+       PROGRAM-ID. FR18DB02.                                            00032001
+                                                                        00033001
+      *=========================================================*       00034001
+      *  GERENTE DO : IVAN SANCHES                              *       00034101
+      *  PROJETO                                                *       00034201
+      *  AUTOR      : PITER FANTI                               *       00034301
+      *  EMPRESA    : FOURSYS                                   *       00034401
+      *---------------------------------------------------------*       00034501
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00034601
+      *   1.0   07/06/22  PITER FANTI    VERSAO INICIAL         *       00034701
+      *---------------------------------------------------------*       00034801
+      *  OBJETIVO   : DB2: PROGRAMA QUE LE TABELA DB2 E DA DISP *       00034901
+      *               NA SYSOUT CHAMANDO POR MEIO DO COMANDO DB2*       00035001
+      *               SELECT EM TODOS OS REGISTROS LIDOS        *       00035101
+      *---------------------------------------------------------*       00035201
+      *   BASE DE DADOS:                                        *       00035309
+      *   DDNAME          I/O                INCLUDE/BOOK       *       00035401
+      *    IVAN.FUNC       I                    #BKFUNC         *       00035509
+      *=========================================================*       00035601
+                                                                        00035701
+      *====================================================             00035801
+       ENVIRONMENT                               DIVISION.              00035901
+      *====================================================             00036001
+       INPUT-OUTPUT                              SECTION.               00037001
+      *====================================================             00038001
+       DATA                                      DIVISION.              00039001
+      *====================================================             00040001
+       FILE                                    SECTION.                 00050001
+      *----------------------------------------------------             00060001
+       WORKING-STORAGE                         SECTION.                 00070001
+      *----------------------------------------------------             00080001
+            EXEC SQL                                                    00090001
+              INCLUDE #BKFUNC                                           00100001
+            END-EXEC.                                                   00110001
+                                                                        00120001
+            EXEC SQL                                                    00130001
+              INCLUDE SQLCA                                             00140001
+            END-EXEC.                                                   00150001
+                                                                        00151001
+            EXEC SQL                                                    00152001
+              DECLARE CFUNC CURSOR FOR                                  00153001
+                SELECT * FROM IVAN.FUNC                                 00154001
+                 ORDER BY ID                                            00155001
+                  WITH UR                                               00155110
+                                                                        00155210
+            END-EXEC.                                                   00156001
+                                                                        00157005
+                                                                        00158005
+      *------VARIAVEIS-DE-DISPLAY-----------------                      00158105
+       77 WRK-MSGFIN    PIC X(30) VALUE '---FIM DO PROCESSAMENTO---'.   00159006
+       77 WRK-LIN-BRANC PIC X(30) VALUE SPACES.                         00159106
+                                                                        00160001
+      *-----MASCARA-PARA-STATUS-SQL-----------                          00170004
+       77 WRK-SQLCODE               PIC -999.                           00180001
+                                                                        00181004
+      *-----AUXILIAR-CASO-EMAIL-NULO----------                          00182004
+       77 WRK-NULL-EMAIL            PIC S9(4) COMP.                     00190001
+                                                                        00190104
+      *-----CONTADORES-E-ACUMULADORES---------                          00190204
+       77 WRK-REGLIDOS              PIC 9(03)         VALUE ZEROES.     00190304
+       77 WRK-SOMASAL               PIC 9(10)V99      VALUE ZEROES.     00190407
+       77 WRK-MEDIASAL              PIC 9(10)V99      VALUE ZEROES.     00190507
+       77 WRK-MAIORSAL              PIC 9(10)V99      VALUE ZEROES.     00190607
+                                                                        00191001
+      *====================================================             00192001
+       PROCEDURE                                 DIVISION.              00193001
+      *====================================================             00193101
+                                                                        00193201
+      *----------------------------------------------------             00193301
+       0000-PRINCIPAL                            SECTION.               00193401
+      *----------------------------------------------------             00193501
+           PERFORM 1000-INICIAR.                                        00193601
+           PERFORM 2000-PROCESSAR UNTIL SQLCODE NOT EQUAL ZEROES.       00193709
+           PERFORM 3000-FINALIZAR.                                      00193801
+                                                                        00193901
+           STOP RUN.                                                    00194001
+      *----------------------------------------------------             00194101
+       0000-99-FIM.                       EXIT.                         00194201
+      *----------------------------------------------------             00194301
+                                                                        00194401
+      *----------------------------------------------------             00194501
+       1000-INICIAR                              SECTION.               00194601
+      *----------------------------------------------------             00194701
+                                                                        00195001
+            EXEC SQL                                                    00195101
+              OPEN CFUNC                                                00195201
+            END-EXEC.                                                   00195301
+             EVALUATE SQLCODE                                           00195501
+               WHEN 0                                                   00195601
+                 PERFORM 4000-LER-FUNCIONARIO                           00195701
+               WHEN 100                                                 00195801
+                 DISPLAY 'SEM FUNCIONARIOS '                            00195901
+               WHEN OTHER                                               00196001
+                 MOVE SQLCODE TO WRK-SQLCODE                            00196101
+                 DISPLAY 'ERRO NO OPEN CURSOR ' WRK-SQLCODE             00196201
+                  MOVE 200 TO RETURN-CODE                               00196309
+                 STOP RUN                                               00196401
+               END-EVALUATE.                                            00196501
+      *----------------------------------------------------             00196701
+       1000-99-FIM.             EXIT.                                   00196801
+      *----------------------------------------------------             00196901
+      *----------------------------------------------------             00197001
+       2000-PROCESSAR                            SECTION.               00197101
+      *----------------------------------------------------             00197201
+                                                                        00197301
+                DISPLAY '------------------------------'.               00197501
+                DISPLAY 'ID.......: ' DB2-ID.                           00197601
+                DISPLAY 'NOME.....: ' DB2-NOME.                         00197701
+                DISPLAY 'SETOR....: ' DB2-SETOR.                        00197801
+                DISPLAY 'SALARIO..: ' DB2-SALARIO.                      00197901
+                DISPLAY 'DATAADM..: ' DB2-DATAADM.                      00198001
+                IF WRK-NULL-EMAIL = 0                                   00198101
+                   DISPLAY 'EMAIL....: ' DB2-EMAIL                      00198201
+                ELSE                                                    00198301
+                   DISPLAY 'EMAIL NULO '                                00198401
+                END-IF.                                                 00198501
+                                                                        00198601
+                PERFORM 4000-LER-FUNCIONARIO.                           00198703
+                                                                        00250501
+      *----------------------------------------------------             00250601
+       2000-99-FIM.             EXIT.                                   00250701
+      *----------------------------------------------------             00250801
+                                                                        00250901
+      *----------------------------------------------------             00251001
+       3000-FINALIZAR                            SECTION.               00252001
+      *----------------------------------------------------             00253001
+                                                                        00254001
+            EXEC SQL                                                    00254101
+              CLOSE CFUNC                                               00254202
+            END-EXEC.                                                   00254301
+                                                                        00254407
+            DIVIDE WRK-SOMASAL BY WRK-REGLIDOS GIVING WRK-MEDIASAL.     00254507
+                                                                        00254601
+            DISPLAY WRK-LIN-BRANC.                                      00254705
+            DISPLAY 'NUM DE FUNCIONARIOS.: ' WRK-REGLIDOS.              00254805
+            DISPLAY 'SOMA DOS SALARIOS...: ' WRK-SOMASAL.               00254905
+            DISPLAY 'MEDIA DOS SALARIOS..: ' WRK-MEDIASAL.              00255005
+            DISPLAY 'MAIOR SALARIO.......: ' WRK-MAIORSAL.              00255107
+            DISPLAY WRK-LIN-BRANC.                                      00255205
+            DISPLAY WRK-MSGFIN.                                         00255305
+                                                                        00256001
+      *----------------------------------------------------             00257001
+       3000-99-FIM.             EXIT.                                   00258001
+      *----------------------------------------------------             00259001
+                                                                        00260001
+      *----------------------------------------------------             00261001
+       4000-LER-FUNCIONARIO                      SECTION.               00262001
+      *----------------------------------------------------             00263001
+                                                                        00264001
+            EXEC SQL                                                    00265001
+              FETCH CFUNC                                               00265101
+              INTO :DB2-ID,                                             00265201
+                   :DB2-NOME,                                           00265301
+                   :DB2-SETOR,                                          00265401
+                   :DB2-SALARIO,                                        00265501
+                   :DB2-DATAADM,                                        00265601
+                   :DB2-EMAIL     :WRK-NULL-EMAIL                       00265701
+            END-EXEC.                                                   00266001
+                                                                        00266101
+            EVALUATE SQLCODE                                            00266201
+              WHEN 0                                                    00266301
+                ADD 1 TO WRK-REGLIDOS                                   00267405
+                ADD DB2-SALARIO TO WRK-SOMASAL                          00267505
+                 IF DB2-SALARIO GREATER WRK-MAIORSAL                    00267605
+                    MOVE DB2-SALARIO TO WRK-MAIORSAL                    00267705
+                 END-IF                                                 00267805
+              WHEN 100                                                  00267901
+                DISPLAY 'FINAL DA TABELA '                              00268001
+              WHEN OTHER                                                00268101
+                MOVE SQLCODE TO WRK-SQLCODE                             00268201
+                DISPLAY 'ERRO NO READ ' WRK-SQLCODE                     00268301
+            END-EVALUATE.                                               00268401
+                                                                        00268501
+      *----------------------------------------------------             00268601
+       4000-99-FIM.             EXIT.                                   00268701
+      *----------------------------------------------------             00269001
+                                                                        00270001

@@ -1,0 +1,127 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+       PROGRAM-ID. FR18CB17.                                            00040000
+                                                                        00050000
+      *=====================================================            00060000
+      *  AUTOR: PITER FANTI                                             00070000
+      *  EMPRESA: FOURSYS                                               00080000
+      *=====================================================            00090000
+                                                                        00100000
+      *====================================================             00110000
+       ENVIRONMENT                               DIVISION.              00120000
+      *====================================================             00130000
+       CONFIGURATION                             SECTION.               00140000
+       SPECIAL-NAMES.                                                   00150000
+           DECIMAL-POINT IS COMMA.                                      00160000
+                                                                        00170000
+      *====================================================             00180000
+       DATA                                      DIVISION.              00190000
+      *====================================================             00200000
+       WORKING-STORAGE                         SECTION.                 00210000
+      *--------------VARIAVEIS-DE-TRABALHO------------------            00211000
+       01 WRK-DADOS.                                                    00220000
+          05 WRK-CODIGO    PIC 9(05)              VALUE ZEROES.         00230000
+          05 WRK-PRODUTO   PIC X(09)              VALUE SPACES.         00240000
+          05 WRK-VALOR     PIC 9(06)V99           VALUE ZEROES.         00250000
+          05 WRK-ESTADO    PIC A(02)              VALUE SPACES.         00260000
+       77 WRK-VALFRETE     PIC 9(06)V99     COMP  VALUE ZEROES.         00270000
+       77 WRK-VALTOTAL     PIC 9(07)V99     COMP  VALUE ZEROES.         00280000
+                                                                        00281000
+      *--------------MASCARAS-DAS-VARIAVEIS-----------------            00290000
+       77 WRK-VALFRETE-ED  PIC ZZZ.ZZ9,99.                              00310000
+       77 WRK-VALTOTAL-ED  PIC Z.ZZZ.ZZ9,99.                            00320000
+       77 WRK-VALOR-ED     PIC ZZZ.ZZ9,99.                              00321000
+                                                                        00330000
+      *00015TELEVISAO00150000SP--(EXEMPLO-DE-ENTRADA-SYSIN)-            00340000
+      *====================================================             00350000
+       PROCEDURE                                 DIVISION.              00360000
+      *====================================================             00370000
+                                                                        00380000
+      *----------------------------------------------------             00390000
+       0000-PRINCIPAL                            SECTION.               00400000
+      *----------------------------------------------------             00410000
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00420000
+           MOVE WRK-VALOR    TO WRK-VALOR-ED.                           00420100
+           DISPLAY 'CODIGO............' WRK-CODIGO.                     00420200
+           DISPLAY 'PRODUTO...........' WRK-PRODUTO.                    00420300
+           DISPLAY 'VALOR...........R$' WRK-VALOR-ED.                   00420400
+                                                                        00533000
+      *----------------------------------------------------             00533200
+      *-----VALIDACAO-FRETE--------------------------------             00533300
+      *----------------------------------------------------             00533400
+           IF WRK-ESTADO IS ALPHABETIC AND WRK-VALOR IS NUMERIC         00533500
+      *-----------------------------------------------------------      00533600
+      *-----VERIFICACAO-DOS-ESTADOS-QUE-EXISTE-ENTREGA------------      00533700
+      *-----------------------------------------------------------      00533800
+             IF    WRK-ESTADO EQUAL TO 'SP'                             00533900
+                OR WRK-ESTADO EQUAL TO 'RJ'                             00534000
+                OR WRK-ESTADO EQUAL TO 'MG'                             00534100
+      *-----------------------------------------------------------      00534200
+      *-----CALCULA-O-FRETE-OU-INDICA-QUE-NAO-EXISTE-ENTREGA------      00534300
+      *-----------------------------------------------------------      00534400
+                  IF     WRK-VALOR GREATER THAN 999,00                  00534500
+                     AND WRK-ESTADO EQUAL 'SP'                          00534600
+                         MULTIPLY 1,1 BY WRK-VALOR                      00534700
+                                      GIVING WRK-VALTOTAL               00534800
+                         MULTIPLY 0,1 BY WRK-VALOR                      00534900
+                                      GIVING WRK-VALFRETE               00535000
+                         DISPLAY 'NOS ENTREGAMOS....' WRK-ESTADO        00535100
+                  ELSE                                                  00535200
+                    IF    WRK-VALOR GREATER THAN 999,00                 00535300
+                      AND WRK-ESTADO EQUAL 'RJ'                         00535400
+                          MULTIPLY 1,15 BY WRK-VALOR                    00535500
+                                        GIVING WRK-VALTOTAL             00535600
+                          MULTIPLY 0,15 BY WRK-VALOR                    00535700
+                                        GIVING WRK-VALFRETE             00535800
+                          DISPLAY 'NOS ENTREGAMOS....' WRK-ESTADO       00535900
+                    ELSE                                                00536000
+                      IF     WRK-VALOR GREATER THAN 999,00              00536100
+                         AND WRK-ESTADO EQUAL 'MG'                      00536200
+                             MULTIPLY 1,2 BY WRK-VALOR                  00536300
+                                          GIVING WRK-VALTOTAL           00536400
+                             MULTIPLY 0,2 BY WRK-VALOR                  00536500
+                                          GIVING WRK-VALFRETE           00536600
+                             DISPLAY 'NOS ENTREGAMOS....' WRK-ESTADO    00536700
+                      ELSE                                              00536800
+                        DISPLAY 'RETIRE O PRODUTO NA LOJA'              00536900
+                      END-IF                                            00537000
+                    END-IF                                              00537100
+                  END-IF                                                00537200
+             ELSE                                                       00537300
+      *-----------------------------------------------------------      00537400
+      *------------VERIFICACAO-DOS-ESTADOS-NACIONAIS--------------      00537500
+      *-----------------------------------------------------------      00537600
+               IF   WRK-ESTADO EQUAL 'AC' OR WRK-ESTADO EQUAL 'AL'      00537700
+                 OR WRK-ESTADO EQUAL 'AP' OR WRK-ESTADO EQUAL 'AM'      00537800
+                 OR WRK-ESTADO EQUAL 'BA' OR WRK-ESTADO EQUAL 'CE'      00537900
+                 OR WRK-ESTADO EQUAL 'DF' OR WRK-ESTADO EQUAL 'ES'      00538000
+                 OR WRK-ESTADO EQUAL 'GO' OR WRK-ESTADO EQUAL 'MA'      00538100
+                 OR WRK-ESTADO EQUAL 'MT' OR WRK-ESTADO EQUAL 'MS'      00538200
+                 OR WRK-ESTADO EQUAL 'PA' OR WRK-ESTADO EQUAL 'PB'      00538300
+                 OR WRK-ESTADO EQUAL 'PR' OR WRK-ESTADO EQUAL 'PE'      00538400
+                 OR WRK-ESTADO EQUAL 'PI' OR WRK-ESTADO EQUAL 'RN'      00538500
+                 OR WRK-ESTADO EQUAL 'RS' OR WRK-ESTADO EQUAL 'RO'      00538600
+                 OR WRK-ESTADO EQUAL 'RR' OR WRK-ESTADO EQUAL 'SC'      00538700
+                 OR WRK-ESTADO EQUAL 'SE' OR WRK-ESTADO EQUAL 'TO'      00538800
+                 DISPLAY 'NAO ENTREGAMOS NESSE ESTADO..' WRK-ESTADO     00538900
+               ELSE                                                     00539000
+                 DISPLAY 'O ESTADO NAO EXISTE NO BRASIL..' WRK-ESTADO   00539100
+               END-IF                                                   00539200
+             END-IF                                                     00539300
+           ELSE                                                         00539400
+             DISPLAY 'ESTADO E/OU VALOR NÃO CONFORMES'                  00539500
+           END-IF.                                                      00539600
+      *----------------------------------------------------             00539700
+      *0000-99FIM.             EXIT.                                    00539800
+      *----------------------------------------------------             00539900
+                                                                        00540000
+           MOVE WRK-VALFRETE TO WRK-VALFRETE-ED.                        00540100
+           MOVE WRK-VALTOTAL TO WRK-VALTOTAL-ED.                        00540200
+           DISPLAY 'VALOR DO FRETE..R$' WRK-VALFRETE-ED.                00540300
+           DISPLAY 'VALOR TOTAL.....R$' WRK-VALTOTAL-ED.                00540400
+      *----------------------------------------------------             00541000
+       0000-99FIM.             EXIT.                                    00550000
+      *----------------------------------------------------             00560000
+                                                                        00570000
+           STOP RUN.                                                    00820000

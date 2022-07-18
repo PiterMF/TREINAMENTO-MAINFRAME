@@ -1,0 +1,168 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00031000
+       PROGRAM-ID. ARQ1802.                                             00032000
+                                                                        00033000
+      *======================================================*          00041000
+      *  PROGRAMADOR: PITER FANTI                            *          00042000
+      *  INSTRUTOR  : IVAN SANCHES                           *          00043000
+      *  EMPRESA    : FOURSYS                                *          00044000
+      *  DATA       : 13/05/2022                             *          00045000
+      *------------------------------------------------------*          00046000
+      *  OBJETIVO   : PROGRAMA LE ARQUIVO DE REGISTRO        *          00047000
+      *               (PR.FOUR018.REGISTRO) CHAMA OS DADOS NA*          00048000
+      *               SYSOUT E CALCULA O SALARIO TOTAL E A   *          00049000
+      *               SOMA DOS SALARIOS DO CODIGO 0234       *          00049100
+      *------------------------------------------------------*          00049400
+      *  ARQUIVOS   :                                        *          00049500
+      *   DDNAME          I/O                INCLUDE/BOOK    *          00049600
+      *   EREGISTRO        I                       -         *          00049700
+      *======================================================*          00051700
+                                                                        00060000
+      *====================================================             00070001
+       ENVIRONMENT                               DIVISION.              00080000
+      *====================================================             00090000
+       CONFIGURATION                             SECTION.               00100000
+       SPECIAL-NAMES.                                                   00110000
+           DECIMAL-POINT IS COMMA.                                      00120000
+      *----------------------------------------------------             00130000
+       INPUT-OUTPUT                              SECTION.               00140000
+       FILE-CONTROL.                                                    00141000
+           SELECT REGISTRO ASSIGN TO REGISTRO                           00142000
+               FILE STATUS IS WRK-FS-REGISTRO.                          00143000
+                                                                        00144000
+      *====================================================             00145000
+       DATA                                      DIVISION.              00146000
+      *====================================================             00147000
+       FILE                                    SECTION.                 00148000
+       FD REGISTRO                                                      00149000
+           RECORDING MODE IS F                                          00150000
+           BLOCK CONTAINS 0 RECORDS.                                    00160000
+                                                                        00170000
+      *-------LRECL-37----------                                        00180000
+       01 FD-REGISTRO.                                                  00190000
+          05 FD-CODIGO   PIC 9(05).                                     00191000
+          05 FD-NOME     PIC X(20).                                     00193000
+          05 FD-CODCARGO PIC X(04).                                     00194000
+          05 FD-SALARIO  PIC 9(08).                                     00195000
+                                                                        00196000
+      *----------------------------------------------------             00197000
+       WORKING-STORAGE                         SECTION.                 00198000
+      *----------------------------------------------------             00199000
+      *----------------------------------------                         00200001
+       77 FILLER PIC X(70) VALUE 'STATUS DA OPERACAO'.                  00200101
+      *----------------------------------------                         00200201
+       77 WRK-FS-REGISTRO    PIC 9(02).                                 00201000
+                                                                        00202000
+      *----------------------------------------                         00203001
+       77 FILLER PIC X(70)                                              00204001
+                 VALUE 'QNT REGISTROS E DE ANALISTAS'.                  00204101
+      *----------------------------------------                         00204201
+       77 WRK-QNTREG         PIC 9(02)    VALUE ZEROES.                 00204300
+       77 WRK-QNTAN          PIC 9(02)    VALUE ZEROES.                 00204400
+                                                                        00204500
+      *----------------------------------------                         00204601
+       77 FILLER PIC X(70)                                              00204701
+                 VALUE 'SOMA SALARIOS TOTAIS E DE ANALISTAS'.           00204801
+      *----------------------------------------                         00204901
+       77 WRK-SALARIO        PIC 9(07)V99 VALUE ZEROES.                 00205000
+       77 WRK-SOMA-SAL       PIC 9(07)V99 VALUE ZEROES.                 00205100
+       77 WRK-SOMA-SAL-AN    PIC 9(07)V99 VALUE ZEROES.                 00205200
+                                                                        00205300
+      *----------------------------------------                         00205401
+       77 FILLER PIC X(70) VALUE 'MASCARAS DOS SALARIOS'.               00205501
+      *----------------------------------------                         00205601
+       77 WRK-SOMA-SAL-ED    PIC $Z.ZZZ.ZZ9,99.                         00205700
+       77 WRK-SOMA-SAL-AN-ED PIC $Z.ZZZ.ZZ9,99.                         00205800
+                                                                        00205900
+      *----------------------------------------                         00206001
+       77 FILLER PIC X(70) VALUE 'FORMATACAO DO DISPLAY'.               00206101
+      *---------------------------------------                          00206201
+       77 WRK-PULA-LINHA     PIC X(01)    VALUE SPACES.                 00206300
+       77 WRK-PONTILHADO     PIC X(37)    VALUE ALL '-'.                00206400
+      *====================================================             00206500
+       PROCEDURE                                 DIVISION.              00206600
+      *====================================================             00207000
+                                                                        00208000
+      *----------------------------------------------------             00209000
+       0000-PRINCIPAL                            SECTION.               00210000
+      *----------------------------------------------------             00220000
+           PERFORM 1000-INICIAR.                                        00230000
+           PERFORM 2000-PROCESSAR UNTIL WRK-FS-REGISTRO EQUAL '10'.     00240000
+           PERFORM 3000-FINALIZAR.                                      00250000
+                                                                        00260000
+           STOP RUN.                                                    00270000
+      *----------------------------------------------------             00280000
+       0000-99-FIM.                       EXIT.                         00290000
+      *----------------------------------------------------             00300000
+                                                                        00310000
+      *----------------------------------------------------             00320000
+       1000-INICIAR                              SECTION.               00330000
+      *----------------------------------------------------             00331000
+           OPEN INPUT REGISTRO.                                         00332000
+              IF WRK-FS-REGISTRO EQUAL '35'                             00335000
+                 DISPLAY 'ARQUIVO NAO EXISTE'                           00335100
+                 STOP RUN                                               00335200
+              ELSE                                                      00335300
+                 PERFORM 4000-TESTAR-VAZIO                              00335400
+                 DISPLAY '--------RELATORIO DE CLIENTES-------'         00335500
+                 DISPLAY WRK-PULA-LINHA                                 00335600
+              END-IF.                                                   00335700
+      *----------------------------------------------------             00335800
+       1000-99-FIM.            EXIT.                                    00335900
+      *----------------------------------------------------             00336000
+                                                                        00336100
+      *----------------------------------------------------             00336200
+       2000-PROCESSAR                            SECTION.               00337000
+      *----------------------------------------------------             00338000
+              DISPLAY FD-CODIGO FD-NOME FD-CODCARGO.                    00339000
+              MOVE FD-SALARIO TO WRK-SALARIO.                           00339100
+              DIVIDE WRK-SALARIO BY 100 GIVING WRK-SALARIO.             00339200
+              ADD 1 TO WRK-QNTREG.                                      00339300
+              ADD WRK-SALARIO TO WRK-SOMA-SAL.                          00339400
+                                                                        00339500
+      *-------SE COD = 0234 = ANALISTA--------------                    00339601
+              IF FD-CODCARGO EQUAL 0234                                 00339700
+                 ADD 1 TO WRK-QNTAN                                     00339800
+                 ADD WRK-SALARIO TO WRK-SOMA-SAL-AN                     00339900
+              END-IF.                                                   00340000
+                                                                        00340100
+              PERFORM 4000-TESTAR-VAZIO.                                00340200
+      *----------------------------------------------------             00341000
+       2000-99-FIM.            EXIT.                                    00341100
+      *----------------------------------------------------             00341200
+                                                                        00341300
+      *----------------------------------------------------             00341400
+       3000-FINALIZAR                            SECTION.               00341500
+      *----------------------------------------------------             00341600
+           CLOSE REGISTRO.                                              00341700
+              MOVE WRK-SOMA-SAL    TO WRK-SOMA-SAL-ED.                  00341800
+              MOVE WRK-SOMA-SAL-AN TO WRK-SOMA-SAL-AN-ED.               00341900
+                                                                        00342000
+              DISPLAY WRK-PULA-LINHA                                    00342100
+              DISPLAY 'TOTAL DE REGISTROS LIDOS: ' WRK-QNTREG.          00342200
+              DISPLAY 'TOTAL DE REGISTROS DE ANALISTA: ' WRK-QNTAN.     00342300
+              DISPLAY WRK-PULA-LINHA                                    00342400
+              DISPLAY 'SALARIO TOTAL: ' WRK-SOMA-SAL-ED.                00342600
+              DISPLAY 'SALARIO TOTAL (ANALISTAS): '                     00342700
+                                        WRK-SOMA-SAL-AN-ED.             00342800
+              DISPLAY WRK-PULA-LINHA                                    00342900
+              DISPLAY '-----------FIM DO RELATORIO----------'.          00343000
+      *----------------------------------------------------             00343100
+       3000-99-FIM.             EXIT.                                   00344000
+      *----------------------------------------------------             00345000
+                                                                        00346000
+      *----------------------------------------------------             00384000
+       4000-TESTAR-VAZIO                         SECTION.               00385000
+      *----------------------------------------------------             00386000
+           READ REGISTRO.                                               00387000
+              IF WRK-FS-REGISTRO EQUAL 10                               00388000
+                   DISPLAY WRK-PULA-LINHA                               00388100
+                   DISPLAY WRK-PONTILHADO                               00389000
+                   DISPLAY '------------FINAL DE ARQUIVO---------'      00390000
+                   DISPLAY WRK-PONTILHADO                               00400000
+              END-IF.                                                   00410000
+      *----------------------------------------------------             00420000
+       4000-99-FIM.             EXIT.                                   00430000
+      *----------------------------------------------------             00440000

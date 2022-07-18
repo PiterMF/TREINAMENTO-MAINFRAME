@@ -1,0 +1,261 @@
+      *==================================================               00001006
+       IDENTIFICATION DIVISION.                                         00010000
+      *==================================================               00011006
+                                                                        00012012
+       PROGRAM-ID. F18CIP1.                                             00020000
+                                                                        00020112
+      *==========================================================*      00020212
+      *  GERENTE DO : IVAN SANCHES                               *      00020312
+      *  PROJETO                                                 *      00020412
+      *  AUTOR      : PITER FANTI                                *      00020512
+      *  EMPRESA    : FOURSYS                                    *      00020612
+      *----------------------------------------------------------*      00020712
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO  *      00020812
+      *   1.0   21/06/22  PITER FANTI  VERSAO INICIAL            *      00020912
+      *   1.1   22/06/22  PITER FANTI  IMPLEMENTADAS OPCOES DE   *      00021012
+      *                                COMANDOS ENTER, F5,F6,F7  *      00021112
+      *   1.2   23/06/22  PITER FANTI  CORRECAO DE CASAS DECIMAIS*      00021222
+      *                                NO SALARIO, FORMATACAO E  *      00021334
+      *                                F6 GRAVA NA TABELA DB2    *      00021434
+      *   1.2   27/06/22  PITER FANTI  FINALIZACAO DA INCLUSAO E *      00021537
+      *                                EXCLUSAO DE DADOS COM F6 E*      00021637
+      *                                F7 RESPECTIVAMENTE        *      00021737
+      *----------------------------------------------------------*      00021837
+      *  OBJETIVO   : PROGRAMA DE LEITURA DO MAPA F18CIM1 PARA   *      00021937
+      *               RETORNAR DADOS CONSULTADOS NO MAPA DE FORMA*      00022037
+      *               AUTOMATICA SEGUINDO OS COMANDOS DISPONIVEIS*      00022137
+      *               NO RODAPE. DADOS LIDOS DA TABELA IVAN.FUNC *      00022237
+      *==========================================================*      00022337
+                                                                        00022437
+      *==================================================               00023022
+       DATA DIVISION.                                                   00030000
+      *==================================================               00031006
+       WORKING-STORAGE SECTION.                                         00040002
+      *==================================================               00041006
+            EXEC SQL                                                    00042015
+              INCLUDE #BKFUNC                                           00043015
+            END-EXEC.                                                   00044015
+                                                                        00045015
+            EXEC SQL                                                    00046015
+              INCLUDE SQLCA                                             00047015
+            END-EXEC.                                                   00048015
+                                                                        00049015
+           COPY F18CIM1.                                                00050000
+                                                                        00050116
+      *-----------------------------------------                        00050235
+       01 FILLER PIC X(70) VALUE 'VARIAVEL DE FORMATACAO DATA'.         00050335
+      *-----------------------------------------                        00050435
+       01 WRK-DATAADMO.                                                 00050616
+          05 WRK-DATAANOO PIC X(04).                                    00050728
+          05 FILLER       PIC X(01) VALUE '-'.                          00050823
+          05 WRK-DATAMESO PIC X(02).                                    00050928
+          05 FILLER       PIC X(01) VALUE '-'.                          00051023
+          05 WRK-DATADIAO PIC X(02).                                    00051128
+                                                                        00051216
+      *-----------------------------------------                        00051335
+       01 FILLER PIC X(70) VALUE 'VARIAVEIS DE STATUS E CONTAGEM'.      00051435
+      *-----------------------------------------                        00051535
+       77 WRK-NULL-EMAIL  PIC S9(04) COMP.                              00051626
+       77 WRK-SQLCODE     PIC -999.                                     00051826
+       77 WRK-POS         PIC 9(02).                                    00052026
+                                                                        00052126
+      *==================================================               00053006
+       PROCEDURE                         DIVISION.                      00060001
+      *==================================================               00061006
+                                                                        00070001
+      *----------------------------------------------------             00071013
+       0000-PRINCIPAL                            SECTION.               00072015
+      *----------------------------------------------------             00073013
+           PERFORM 1000-INICIAR.                                        00074015
+           PERFORM 2000-PROCESSAR.                                      00076015
+                                                                        00077015
+            EXEC CICS                                                   00077115
+              RETURN TRANSID ('T181')                                   00077215
+            END-EXEC.                                                   00077315
+      *-----------------------------------------------------            00078113
+       0000-99-FIM.       EXIT.                                         00078215
+      *-----------------------------------------------------            00078313
+                                                                        00079013
+      *----------------------------------------------------             00079115
+       1000-INICIAR                              SECTION.               00079215
+      *----------------------------------------------------             00079315
+            MOVE ZEROES TO IDO.                                         00079439
+            EXEC CICS SEND                                              00080001
+               MAPSET('F18CIM1')                                        00090001
+               MAP('MAPA01')                                            00100001
+                ERASE                                                   00110001
+               MAPONLY                                                  00120001
+            END-EXEC.                                                   00130001
+      *-----------------------------------------------------            00131015
+       1000-99-FIM.       EXIT.                                         00131115
+      *-----------------------------------------------------            00131215
+                                                                        00131315
+      *----------------------------------------------------             00131409
+       2000-PROCESSAR                            SECTION.               00131515
+      *----------------------------------------------------             00131615
+            EXEC CICS RECEIVE                                           00131708
+               MAPSET('F18CIM1')                                        00131808
+               MAP('MAPA01')                                            00131908
+               INTO(MAPA01I)                                            00132008
+            END-EXEC.                                                   00132108
+      *-----------------------------------------------------            00132209
+                                                                        00132309
+             IF EIBAID = ':'                                            00132413
+                 EXEC CICS                                              00132509
+                   RETURN                                               00132609
+                 END-EXEC                                               00132709
+             END-IF.                                                    00132809
+                                                                        00132901
+             IF EIBAID = '5'                                            00133010
+                MOVE IDI TO DB2-ID                                      00133120
+                   EXEC SQL                                             00133216
+                     SELECT ID,NOME,SETOR,SALARIO,DATAADM,EMAIL         00133316
+                     INTO :DB2-ID,                                      00133418
+                          :DB2-NOME,                                    00133519
+                          :DB2-SETOR,                                   00133619
+                          :DB2-SALARIO,                                 00133719
+                          :DB2-DATAADM,                                 00133819
+                          :DB2-EMAIL   :WRK-NULL-EMAIL                  00133918
+                     FROM IVAN.FUNC                                     00134016
+                       WHERE ID = :DB2-ID                               00134116
+                       FETCH FIRST ROW ONLY                             00134217
+                     END-EXEC                                           00134316
+                                                                        00134416
+                     EVALUATE SQLCODE                                   00134516
+                        WHEN 0                                          00134616
+                          PERFORM 2100-MOVE-DADOS                       00134716
+                                                                        00134816
+                        WHEN 100                                        00134916
+                          MOVE 'REGISTRO NAO ENCONTRADO' TO MSGO        00135016
+                                                                        00135116
+                        WHEN OTHER                                      00135216
+                          MOVE 'ERRO= '    TO MSGO                      00135332
+                          MOVE WRK-SQLCODE TO MSGO(07:04)               00135417
+                     END-EVALUATE                                       00135517
+                                                                        00135617
+             END-IF.                                                    00135740
+                                                                        00135821
+      *--------INCLUSAO-------------                                    00135939
+                                                                        00136039
+               IF EIBAID = '6'                                          00136123
+                  MOVE 'ERRO= ' TO MSGO                                 00136232
+                  MOVE 7 TO WRK-POS                                     00136323
+                                                                        00136438
+                  IF IDL NOT GREATER 0                                  00136539
+                     MOVE 'ID,' TO MSGO(WRK-POS:3)                      00136623
+                     ADD 3 TO WRK-POS                                   00136723
+                  END-IF                                                00136823
+                  IF NOMEL NOT GREATER 0 OR NOMEI EQUAL SPACES          00136939
+                     MOVE 'NOME,' TO MSGO(WRK-POS:5)                    00137223
+                     ADD 5 TO WRK-POS                                   00137323
+                  END-IF                                                00137423
+                  IF SETORL NOT GREATER 0 OR SETORI EQUAL SPACES        00137539
+                     MOVE 'SETOR,' TO MSGO(WRK-POS:6)                   00137823
+                     ADD 6 TO WRK-POS                                   00137923
+                  END-IF                                                00138023
+                  IF SALARIOI NOT GREATER ZEROES                        00138129
+                     MOVE 'SALARIO,' TO MSGO(WRK-POS:8)                 00138223
+                     ADD 8 TO WRK-POS                                   00138423
+                  END-IF                                                00138723
+                  IF DATADIAL NOT GREATER 0 OR DATAMESL NOT GREATER 0   00138841
+                     OR DATAANOL NOT GREATER 0                          00138941
+                     MOVE 'DATAADM,' TO MSGO(WRK-POS:8)                 00139023
+                     ADD 8 TO WRK-POS                                   00139123
+                  END-IF                                                00140223
+                  IF EMAILL NOT GREATER 0                               00140339
+                     MOVE SPACES TO DB2-EMAIL                           00140439
+                  END-IF                                                00140529
+                  IF WRK-POS EQUAL 7                                    00140629
+                     MOVE IDI          TO DB2-ID                        00140729
+                     MOVE NOMEI        TO DB2-NOME                      00140829
+                     MOVE SETORI       TO DB2-SETOR                     00140929
+                     MOVE SALARIOI     TO DB2-SALARIO                   00141029
+                     MOVE DATADIAI     TO WRK-DATADIAO                  00141139
+                     MOVE DATAMESI     TO WRK-DATAMESO                  00141239
+                     MOVE DATAANOI     TO WRK-DATAANOO                  00141339
+                     MOVE WRK-DATAADMO TO DB2-DATAADM                   00141439
+                     MOVE EMAILI       TO DB2-EMAIL                     00141529
+                                                                        00141630
+                                                                        00141729
+                  EXEC SQL                                              00141829
+                   INSERT INTO                                          00141929
+                    IVAN.FUNC(ID,NOME,SETOR,SALARIO,DATAADM,EMAIL)      00142029
+                    VALUES(:DB2-ID,                                     00142129
+                           :DB2-NOME,                                   00142229
+                           :DB2-SETOR,                                  00142329
+                           :DB2-SALARIO,                                00142429
+                           :DB2-DATAADM,                                00142529
+                           :DB2-EMAIL )                                 00142629
+                  END-EXEC                                              00142729
+                  END-IF                                                00142830
+                  EVALUATE SQLCODE                                      00142929
+                     WHEN 0                                             00143029
+                        EXEC SQL                                        00143129
+                           COMMIT                                       00143229
+                        END-EXEC                                        00143329
+                        MOVE 'REGISTRO GRAVADO' TO MSGO                 00143429
+                     WHEN OTHER                                         00143529
+                        MOVE SQLCODE TO WRK-SQLCODE                     00143629
+                        MOVE WRK-SQLCODE TO MSGO(WRK-POS:4)             00143731
+                        ADD 4 TO WRK-POS                                00143833
+                        MOVE '.'         TO MSGO(WRK-POS:1)             00143933
+                  END-EVALUATE                                          00144033
+                                                                        00144133
+               END-IF.                                                  00144233
+                                                                        00144339
+      *--------EXCLUSAO-------------------                              00144439
+                                                                        00144533
+               IF EIBAID = '7'                                          00144639
+                  MOVE IDI TO DB2-ID                                    00144739
+                  EXEC SQL                                              00144839
+                     DELETE FROM IVAN.FUNC WHERE ID = :DB2-ID           00144939
+                  END-EXEC                                              00145039
+                  EVALUATE SQLCODE                                      00145139
+                     WHEN 0                                             00145239
+                        EXEC SQL                                        00145339
+                           COMMIT                                       00145439
+                        END-EXEC                                        00145539
+                        MOVE 'REGISTRO APAGADO' TO MSGO                 00145639
+                     WHEN 100                                           00145739
+                        MOVE 'REGISTRO NAO ENCONTRADO' TO MSGO          00145839
+                     WHEN OTHER                                         00145939
+                     MOVE SQLCODE TO WRK-SQLCODE                        00146039
+                     MOVE WRK-SQLCODE TO MSGO                           00146139
+                  END-EVALUATE                                          00146239
+               END-IF.                                                  00146339
+                                                                        00146440
+             EXEC CICS SEND                                             00146540
+                MAPSET('F18CIM1')                                       00146640
+                MAP('MAPA01')                                           00146740
+                FROM(MAPA01O)                                           00146840
+                DATAONLY                                                00146940
+             END-EXEC.                                                  00147040
+                                                                        00147133
+      *-----------------------------------------------------            00147233
+       2000-99-FIM.       EXIT.                                         00147333
+      *-----------------------------------------------------            00147433
+      *-----------------------------------------------------            00147533
+       2100-MOVE-DADOS                         SECTION.                 00147633
+      *-----------------------------------------------------            00147733
+            MOVE DB2-NOME     TO NOMEO.                                 00147833
+            MOVE DB2-SETOR    TO SETORO.                                00147933
+            MOVE DB2-SALARIO  TO SALARIOO.                              00148033
+            MOVE DB2-DATAADM  TO WRK-DATAADMO.                          00148133
+            MOVE WRK-DATADIAO TO DATADIAO.                              00148233
+            MOVE WRK-DATAMESO TO DATAMESO.                              00148333
+            MOVE WRK-DATAANOO TO DATAANOO.                              00148433
+            MOVE 'REGISTRO ENCONTRADO' TO MSGO.                         00148533
+            IF WRK-NULL-EMAIL EQUAL ZEROES                              00148633
+               MOVE DB2-EMAIL TO EMAILO                                 00148733
+            ELSE                                                        00148823
+               MOVE SPACES TO EMAILO                                    00148923
+            END-IF.                                                     00149016
+                                                                        00149140
+                                                                        00149240
+                                                                        00149940
+                                                                        00150040
+                                                                        00150140
+                                                                        00150240
+      *-----------------------------------------------------            00151016
+       2100-99-FIM.       EXIT.                                         00160016
+      *-----------------------------------------------------            00170016

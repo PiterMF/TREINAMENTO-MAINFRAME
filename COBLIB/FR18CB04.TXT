@@ -1,0 +1,45 @@
+      *================================================================*00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *================================================================*00030000
+       PROGRAM-ID. FR18CB04.                                            00040000
+                                                                        00041000
+      *=========================================================*       00050000
+      *  INSTRUTOR  : IVAN SANCHES                              *       00060001
+      *  AUTOR      : PITER FANTI                               *       00080000
+      *  EMPRESA    : FOURSYS                                   *       00090000
+      *---------------------------------------------------------*       00091000
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00092000
+      *   1.0   13/05/22  PITER FANTI    VERSAO INICIAL         *       00093000
+      *---------------------------------------------------------*       00094000
+      *  OBJETIVO   : PROGRAMA ACEITA DADOS DA SYSIN E IMPRIME  *       00095000
+      *               COM EXCESSAO DO FABRICANTE (USO DE FILLER)*       00096000
+      *=========================================================*       00099200
+                                                                        00099300
+      *================================================================*00101000
+       ENVIRONMENT                               DIVISION.              00102000
+      *================================================================*00103000
+       CONFIGURATION                             SECTION.               00103100
+       SPECIAL-NAMES.                                                   00103200
+           DECIMAL-POINT IS COMMA.                                      00103300
+      *================================================================*00105000
+       DATA                                      DIVISION.              00106000
+      *================================================================*00107000
+       WORKING-STORAGE                           SECTION.               00108000
+       01 WRK-DADOS.                                                    00109000
+          05 WRK-ID      PIC 9(05)     VALUE ZEROES.                    00109100
+          05 WRK-PRODUTO PIC X(30)     VALUE SPACES.                    00109200
+          05 FILLER      PIC X(10)     VALUE SPACES.                    00109300
+          05 WRK-PRECO   PIC 9(06)V99  VALUE ZEROES.                    00109400
+       77 WRK-PRECO-ED   PIC ZZZ.ZZ9,99.                                00109600
+      *EXEMPLO SYSIN:                                                   00109700
+      *01456AIR FRYER DA PHILLIPS WALLITA POLISHOP  00059998            00109800
+      *================================================================*00109900
+       PROCEDURE                                 DIVISION.              00110000
+      *================================================================*00110100
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00111000
+           DISPLAY 'ID........ ' WRK-ID.                                00120000
+           DISPLAY 'PRODUTO... ' WRK-PRODUTO.                           00130000
+           DISPLAY 'PRECO..... ' WRK-PRECO.                             00140000
+           MOVE WRK-PRECO TO WRK-PRECO-ED.                              00141000
+           DISPLAY 'PRECO-ED.. ' WRK-PRECO-ED.                          00150000
+           STOP RUN.                                                    00170000

@@ -1,0 +1,268 @@
+      *====================================================             00010001
+       IDENTIFICATION                            DIVISION.              00020001
+      *====================================================             00030001
+                                                                        00040001
+       PROGRAM-ID. FR18RELB.                                            00050001
+                                                                        00060001
+      *==========================================================*      00070001
+      *  GERENTE DO : IVAN SANCHES                               *      00080001
+      *  PROJETO                                                 *      00090001
+      *  AUTOR      : PITER FANTI                                *      00100001
+      *  EMPRESA    : FOURSYS                                    *      00110001
+      *----------------------------------------------------------*      00120001
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO  *      00130001
+      *   1.0   14/06/22  PITER FANTI    VERSAO INICIAL          *      00140001
+      *----------------------------------------------------------*      00150001
+      *  OBJETIVO   : LER OS REGISTROS  DO ARQUIVO SRELBENE E    *      00160001
+      *               REORGANIZAR O MESMO PARA FORMATAR COMO UM  *      00170001
+      *               RELATORIO                                  *      00171001
+      *----------------------------------------------------------*      00177001
+      *   ARQUIVOS:                                              *      00178001
+      *   DDNAME          I/O                 INCLUDE/BOOK       *      00179001
+      *  ESRELBENE         I                        -            *      00180011
+      *  SRELBFR18         O                        -            *      00180111
+      *==========================================================*      00181001
+                                                                        00200001
+      *====================================================             00210001
+       ENVIRONMENT                               DIVISION.              00210101
+      *====================================================             00210201
+       INPUT-OUTPUT                              SECTION.               00210301
+       FILE-CONTROL.                                                    00210401
+            SELECT SRELBENE ASSIGN TO SRELBENE                          00210501
+                FILE STATUS IS WRK-FS-SRELBENE.                         00210601
+                                                                        00210701
+            SELECT RELBFR18 ASSIGN TO RELBFR18                          00210807
+                FILE STATUS IS WRK-FS-RELBFR18.                         00210907
+                                                                        00211007
+      *====================================================             00211107
+       DATA                                      DIVISION.              00211207
+      *====================================================             00211307
+       FILE                                    SECTION.                 00212001
+       FD SRELBENE                                                      00213001
+           RECORDING MODE IS F                                          00214001
+           LABEL RECORD IS STANDARD                                     00215001
+           BLOCK CONTAINS 0 RECORDS.                                    00216001
+                                                                        00217001
+       01 FD-SRELBENE PIC X(80).                                        00218008
+                                                                        00219001
+       FD RELBFR18                                                      00219107
+           RECORDING MODE IS F                                          00219207
+           LABEL RECORD IS STANDARD                                     00219307
+           BLOCK CONTAINS 0 RECORDS.                                    00219407
+                                                                        00219507
+       01 FD-RELBFR18 PIC X(79).                                        00219610
+                                                                        00219707
+      *----------------------------------------------------             00220001
+       WORKING-STORAGE                         SECTION.                 00221001
+      *----------------------------------------------------             00222001
+                                                                        00340001
+      *------VARIAVEIS-PARA-WRITE---(LRECL-79)----                      00350001
+       01 FILLER PIC X(70) VALUE '**VARIAVEIS-PARA-WRITE**'.            00360001
+      *-------------------------------------------                      00370001
+       01 WRK-CABEC.                                                    00371001
+          05 WRK-CABEC1.                                                00371101
+             10 FILLER  PIC X(05).                                      00371201
+             10 FILLER  PIC X(48) VALUE                                 00371301
+                'RELATORIO DE FUNCIONARIOS COM BENEFICIOS  PAG: '.      00371401
+             10 WRK-PAG PIC 9(02) VALUE 1.                              00371501
+             10 FILLER  PIC X(24).                                      00371601
+          05 WRK-CABEC2.                                                00371701
+             10 FILLER  PIC X(06) VALUE 'ID    '.                       00371801
+             10 FILLER  PIC X(04) VALUE 'NOME'.                         00371901
+             10 FILLER  PIC X(27) VALUE SPACES.                         00372001
+             10 FILLER  PIC X(11) VALUE 'SALARIO    '.                  00372101
+             10 FILLER  PIC X(13) VALUE 'PLANO MEDICO '.                00373001
+             10 FILLER  PIC X(13) VALUE 'PLANO ODONTO '.                00374001
+             10 FILLER  PIC X(05) VALUE 'COTAS'.                        00375001
+                                                                        00376001
+                                                                        00377001
+      *---LRECL(79)-----------------------------------                  00378001
+       01 WRK-SRELBENE.                                                 00380001
+          05 WRK-ID-WR       PIC 9(05)    VALUE ZEROES.                 00390001
+          05 FILLER          PIC X(01).                                 00391001
+          05 WRK-NOME-WR     PIC X(30)    VALUE SPACES.                 00400001
+          05 FILLER          PIC X(01).                                 00401001
+          05 WRK-SALARIO-WR  PIC 9(08)V99 VALUE ZEROES.                 00410001
+          05 FILLER          PIC X(01).                                 00411001
+          05 WRK-PLANMED-WR  PIC X(10)    VALUE SPACES.                 00420001
+          05 FILLER          PIC X(03).                                 00421001
+          05 WRK-PLANDENT-WR PIC X(10)    VALUE SPACES.                 00430001
+          05 FILLER          PIC X(03).                                 00431001
+          05 WRK-COTAS-WR    PIC 9(03)    VALUE ZEROES.                 00440001
+          05 FILLER          PIC X(02).                                 00441001
+                                                                        00441104
+       01 WRK-TRANSFERIDOR.                                             00442004
+          05 WRK-ID-TF       PIC 9(05)    VALUE ZEROES.                 00443004
+          05 WRK-NOME-TF     PIC X(30)    VALUE SPACES.                 00445004
+          05 WRK-SALARIO-TF  PIC 9(08)V99 VALUE ZEROES.                 00447004
+          05 WRK-PLANMED-TF  PIC X(10)    VALUE SPACES.                 00449004
+          05 WRK-PLANDENT-TF PIC X(10)    VALUE SPACES.                 00449204
+          05 WRK-COTAS-TF    PIC 9(03)    VALUE ZEROES.                 00449404
+                                                                        00450001
+       77 WRK-MSGFIN    PIC X(30) VALUE '---FIM DO RELATORIO---'.       00460001
+       77 WRK-LIN-BRANC PIC X(79) VALUE SPACES.                         00470002
+                                                                        00480001
+      *-----CONTADORES---------------------------*                      00490001
+       77 FILLER PIC X(70) VALUE '**CONTADORES**'.                      00500001
+      *------------------------------------------*                      00510001
+       77 WRK-CONTLID      PIC 9(03)    VALUE ZEROES.                   00520001
+       77 WRK-CONTLINHA    PIC 9(03)    VALUE ZEROES.                   00530004
+       77 WRK-TAM-FOLHA    PIC 9(03)    VALUE ZEROES.                   00531004
+                                                                        00540001
+      *-----MASCARAS-PARA-STATUS-SQL-E-NULL----                         00550001
+       77 FILLER PIC X(70) VALUE '**MASCARAS-PARA-STATUS-SQL-E-NULL**'. 00560001
+      *------------------------------------------*                      00561001
+       77 WRK-SQLCODE               PIC -999.                           00562001
+       77 WRK-PLANMED-NULL          PIC S9(04) COMP.                    00563001
+       77 WRK-PLANDENT-NULL         PIC S9(04) COMP.                    00564001
+       77 WRK-COTAS-NULL            PIC S9(04) COMP.                    00565001
+                                                                        00566001
+      *-----MASCARA-PARA-STATUS-ARQUIVO--------                         00567001
+       77 FILLER PIC X(70) VALUE '**MASCARA-PARA-STATUS-ARQUIVO**'.     00568001
+      *------------------------------------------*                      00569001
+       77 WRK-FS-SRELBENE           PIC 9(02).                          00570001
+       77 WRK-FS-RELBFR18           PIC 9(02).                          00571007
+                                                                        00580001
+      *====================================================             00590001
+       PROCEDURE                                 DIVISION.              00600001
+      *====================================================             00610001
+                                                                        00620001
+      *----------------------------------------------------             00630001
+       0000-PRINCIPAL                            SECTION.               00640001
+      *----------------------------------------------------             00650001
+           PERFORM 1000-INICIAR.                                        00660001
+           PERFORM 2000-PROCESSAR UNTIL WRK-FS-SRELBENE                 00670004
+                                            NOT EQUAL ZEROES.           00671004
+           PERFORM 3000-FINALIZAR.                                      00680001
+                                                                        00690001
+           STOP RUN.                                                    00700001
+      *----------------------------------------------------             00710001
+       0000-99-FIM.                       EXIT.                         00720001
+      *----------------------------------------------------             00730001
+                                                                        00740001
+      *----------------------------------------------------             00750001
+       1000-INICIAR                              SECTION.               00760001
+      *----------------------------------------------------             00770001
+            ACCEPT WRK-TAM-FOLHA FROM SYSIN.                            00771014
+            PERFORM 1100-ABRIR-ARQUIVOS.                                00780001
+            PERFORM 1200-TESTAR-STATUS.                                 00790001
+            PERFORM 1300-WRITE-CABEC.                                   00791004
+      *----------------------------------------------------             00800001
+       1000-99-FIM.             EXIT.                                   00810001
+      *----------------------------------------------------             00820001
+                                                                        00830001
+      *----------------------------------------------------             00840001
+       1100-ABRIR-ARQUIVOS                       SECTION.               00840101
+            OPEN INPUT  SRELBENE.                                       00840501
+            OPEN OUTPUT RELBFR18.                                       00840607
+                                                                        00840701
+       1100-99-FIM.                   EXIT.                             00840801
+      *----------------------------------------------------             00840901
+                                                                        00841001
+      *----------------------------------------------------             00842001
+       1200-TESTAR-STATUS                        SECTION.               00843001
+            EVALUATE WRK-FS-SRELBENE                                    00844001
+              WHEN 0                                                    00845001
+                PERFORM 4000-LER-REGISTRO                               00846001
+              WHEN 10                                                   00847001
+                DISPLAY 'SEM REGISTROS '                                00848001
+              WHEN OTHER                                                00849001
+                DISPLAY 'ERRO NO OPEN SRELBENE ' WRK-FS-SRELBENE        00860001
+                STOP RUN                                                00880001
+            END-EVALUATE.                                               00890001
+                                                                        00891007
+            IF WRK-FS-RELBFR18 NOT EQUAL ZEROES                         00892007
+               DISPLAY 'ERRO NO OPEN RELBFR18 '                         00893007
+               STOP RUN                                                 00894007
+            END-IF.                                                     00895007
+                                                                        00900001
+       1200-99-FIM.             EXIT.                                   00914101
+      *----------------------------------------------------             00914201
+      *----------------------------------------------------             00914304
+       1300-WRITE-CABEC                           SECTION.              00914405
+            WRITE  FD-RELBFR18 FROM WRK-LIN-BRANC.                      00914507
+            IF WRK-PAG EQUAL 1                                          00914604
+               WRITE  FD-RELBFR18 FROM WRK-CABEC1                       00914707
+            ELSE                                                        00914804
+               WRITE FD-RELBFR18 FROM WRK-CABEC1 AFTER PAGE             00914907
+            END-IF.                                                     00915004
+            WRITE  FD-RELBFR18 FROM WRK-LIN-BRANC.                      00915107
+            WRITE  FD-RELBFR18 FROM WRK-CABEC2 AFTER 2 LINE.            00915207
+            ADD 6 TO WRK-CONTLINHA.                                     00915304
+                                                                        00915504
+       1200-99-FIM.             EXIT.                                   00915604
+      *----------------------------------------------------             00915704
+                                                                        00915804
+                                                                        00915904
+      *----------------------------------------------------             00916004
+       2000-PROCESSAR                            SECTION.               00916104
+      *----------------------------------------------------             00916204
+                                                                        00916304
+            IF WRK-FS-SRELBENE EQUAL ZEROES                             00916404
+               PERFORM 2100-MOVE-DADOS                                  00916604
+               WRITE FD-RELBFR18 FROM WRK-SRELBENE                      00917007
+               ADD 1 TO WRK-CONTLINHA                                   00918005
+            ELSE                                                        00950004
+               DISPLAY 'ERRO NA LEITURA ' WRK-FS-SRELBENE               00970004
+            END-IF.                                                     00980004
+                                                                        00990001
+             PERFORM 4000-LER-REGISTRO.                                 01000001
+                                                                        01001004
+      *-------QUEBRA-DE-LINHA------                                     01002004
+            IF WRK-CONTLINHA GREATER WRK-TAM-FOLHA                      01003004
+               ADD  1 TO WRK-PAG                                        01004013
+               MOVE 0 TO WRK-CONTLINHA                                  01005015
+               PERFORM 1300-WRITE-CABEC                                 01006004
+            END-IF.                                                     01007004
+                                                                        01010001
+      *----------------------------------------------------             01020001
+       2000-99-FIM.             EXIT.                                   01030001
+      *----------------------------------------------------             01040001
+      *----------------------------------------------------             01050001
+       2100-MOVE-DADOS                           SECTION.               01060001
+                                                                        01070001
+            MOVE FD-SRELBENE TO WRK-TRANSFERIDOR                        01080016
+                                                                        01080116
+            MOVE WRK-ID-TF       TO WRK-ID-WR.                          01081004
+            MOVE WRK-NOME-TF     TO WRK-NOME-WR.                        01090004
+            MOVE WRK-SALARIO-TF  TO WRK-SALARIO-WR.                     01100004
+            MOVE WRK-PLANMED-TF  TO WRK-PLANMED-WR.                     01130004
+            MOVE WRK-PLANDENT-TF TO WRK-PLANDENT-WR.                    01170004
+            MOVE WRK-COTAS-TF    TO WRK-COTAS-WR.                       01210004
+                                                                        01214001
+                                                                        01215001
+       2100-99-FIM.             EXIT.                                   01216001
+      *----------------------------------------------------             01217001
+      *----------------------------------------------------             01218001
+       3000-FINALIZAR                            SECTION.               01219001
+      *----------------------------------------------------             01220001
+                                                                        01270001
+            CLOSE SRELBENE.                                             01280001
+                                                                        01290001
+            DISPLAY 'REGISTROS LIDOS : ' WRK-CONTLID.                   01310004
+            DISPLAY WRK-LIN-BRANC.                                      01334001
+            DISPLAY WRK-MSGFIN.                                         01335001
+                                                                        01336001
+      *----------------------------------------------------             01337001
+       3000-99-FIM.             EXIT.                                   01338001
+      *----------------------------------------------------             01339001
+                                                                        01340001
+      *----------------------------------------------------             01350001
+       4000-LER-REGISTRO                         SECTION.               01360001
+      *----------------------------------------------------             01370001
+                                                                        01380001
+            READ SRELBENE.                                              01390004
+                                                                        01400004
+            EVALUATE WRK-FS-SRELBENE                                    01490003
+              WHEN 0                                                    01500001
+                 ADD 1 TO WRK-CONTLID                                   01510006
+              WHEN 10                                                   01520004
+                MOVE '----FINAL DO ARQUIVO---' TO WRK-MSGFIN            01530004
+                WRITE FD-RELBFR18 FROM WRK-MSGFIN                       01540007
+              WHEN OTHER                                                01550001
+                DISPLAY 'ERRO NO READ TABELA ' WRK-FS-SRELBENE          01570003
+            END-EVALUATE.                                               01580001
+                                                                        01590001
+      *----------------------------------------------------             01600001
+       4000-99-FIM.             EXIT.                                   01610001
+      *----------------------------------------------------             01620001

@@ -1,0 +1,234 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00040000
+       PROGRAM-ID. FR18DB07.                                            00050000
+                                                                        00060000
+      *==========================================================*      00070003
+      *  GERENTE DO : IVAN SANCHES                               *      00080003
+      *  PROJETO                                                 *      00090003
+      *  AUTOR      : PITER FANTI                                *      00100003
+      *  EMPRESA    : FOURSYS                                    *      00110003
+      *----------------------------------------------------------*      00120003
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO  *      00130003
+      *   1.0   13/06/22  PITER FANTI    VERSAO INICIAL          *      00140003
+      *----------------------------------------------------------*      00150003
+      *  OBJETIVO   : LER FUNCIONARIOS COM SETOR ANALITICO USANDO*      00160003
+      *               TABELAS IVAN.FUNC E IVAN.SETOR             *      00170003
+      *----------------------------------------------------------*      00180003
+      *   BASE DE DADOS:                                         *      00190003
+      *   DDNAME          I/O                INCLUDE/BOOK        *      00200003
+      *    IVAN.FUNC       I                    #BKFUNC          *      00210003
+      *    IVAN.SETOR      I                    #BKSETOR         *      00210103
+      *---------------------------------------------------------*       00210208
+      *   ARQUIVOS:                                             *       00210308
+      *   DDNAME          I/O                INCLUDE/BOOK       *       00210408
+      *   SRELDBJN         O                        -           *       00210508
+      *==========================================================*      00215003
+                                                                        00216000
+      *====================================================             00217000
+       ENVIRONMENT                               DIVISION.              00218000
+      *====================================================             00219000
+       INPUT-OUTPUT                              SECTION.               00220007
+       FILE-CONTROL.                                                    00222007
+            SELECT RELDBJN ASSIGN TO RELDBJN                            00223007
+                FILE STATUS IS WRK-FS-RELDBJN.                          00224007
+                                                                        00225007
+      *====================================================             00226007
+       DATA                                      DIVISION.              00227007
+      *====================================================             00228007
+       FILE                                    SECTION.                 00229007
+       FD RELDBJN                                                       00229107
+           RECORDING MODE IS F                                          00229207
+           LABEL RECORD IS STANDARD                                     00229307
+           BLOCK CONTAINS 0 RECORDS.                                    00229407
+                                                                        00229507
+       01 FD-RELDBJN PIC X(135).                                        00229607
+                                                                        00229707
+      *----------------------------------------------------             00317000
+       WORKING-STORAGE                         SECTION.                 00318000
+      *----------------------------------------------------             00319000
+            EXEC SQL                                                    00320000
+              INCLUDE #BKFUNC                                           00330000
+            END-EXEC.                                                   00340000
+                                                                        00350000
+            EXEC SQL                                                    00351001
+              INCLUDE #BKSETOR                                          00352001
+            END-EXEC.                                                   00353001
+                                                                        00354001
+            EXEC SQL                                                    00360000
+              INCLUDE SQLCA                                             00370000
+            END-EXEC.                                                   00380000
+                                                                        00390000
+            EXEC SQL                                                    00400000
+             DECLARE CFUNC CURSOR FOR                                   00410001
+             SELECT F.ID,F.NOME,F.SALARIO,F.DATAADM,F.EMAIL,S.DESCSETOR 00420001
+             FROM IVAN.FUNC F, IVAN.SETOR S                             00421001
+             WHERE F.SETOR = S.IDSETOR                                  00422001
+             ORDER BY SETOR                                             00430012
+            END-EXEC.                                                   00440000
+                                                                        00450000
+      *------VARIAVEIS-PARA-WRITE-----------------                      00460000
+       01 WRK-RELDBJN.                                                  00470007
+          05 WRK-ID-DSP        PIC 9(05)    VALUE ZEROES.               00480001
+          05 WRK-NOME-DSP      PIC X(30)    VALUE SPACES.               00490001
+          05 WRK-SALARIO-DSP   PIC 9(08)V99 VALUE ZEROES.               00510001
+          05 WRK-DATAADM-DSP   PIC X(10)    VALUE SPACES.               00520001
+          05 WRK-EMAIL-DSP     PIC X(40)    VALUE SPACES.               00530001
+          05 WRK-DESCSETOR-DSP PIC X(40)    VALUE SPACES.               00531001
+                                                                        00540000
+       77 WRK-MSGFIN    PIC X(30) VALUE '---FIM DO RELATORIO---'.       00620001
+       77 WRK-LIN-BRANC PIC X(135) VALUE SPACES.                        00630007
+                                                                        00640000
+      *-----MASCARA-PARA-STATUS-SQL------------                         00650000
+       77 WRK-SQLCODE               PIC -999.                           00660000
+                                                                        00670000
+      *-----VARIAVEL-PARA-AVALIAR-NULO-EMAIL---                         00680000
+       77 WRK-NULL-EMAIL            PIC S9(04) COMP.                    00690000
+                                                                        00700000
+      *----VARIAVEL-PARA-STATUS-RELATORIO-JOIN-                         00701007
+       77 WRK-FS-RELDBJN            PIC 9(02).                          00702010
+                                                                        00703007
+      *====================================================             00704000
+       PROCEDURE                                 DIVISION.              00705000
+      *====================================================             00706000
+                                                                        00707000
+      *----------------------------------------------------             00708000
+       0000-PRINCIPAL                            SECTION.               00709000
+      *----------------------------------------------------             00710000
+           PERFORM 1000-INICIAR.                                        00720000
+           PERFORM 2000-PROCESSAR UNTIL SQLCODE NOT EQUAL ZEROES.       00730000
+           PERFORM 3000-FINALIZAR.                                      00740000
+                                                                        00750000
+           STOP RUN.                                                    00760000
+      *----------------------------------------------------             00770000
+       0000-99-FIM.                       EXIT.                         00780000
+      *----------------------------------------------------             00790000
+                                                                        00800000
+      *----------------------------------------------------             00810000
+       1000-INICIAR                              SECTION.               00820000
+      *----------------------------------------------------             00830000
+            PERFORM 1100-ABRIR-ARQUIVOS.                                00840000
+            PERFORM 1200-TESTAR-STATUS.                                 00840100
+      *----------------------------------------------------             00840200
+       1000-99-FIM.             EXIT.                                   00840300
+      *----------------------------------------------------             00840400
+                                                                        00840500
+      *----------------------------------------------------             00840600
+       1100-ABRIR-ARQUIVOS                       SECTION.               00840700
+            EXEC SQL                                                    00840800
+              OPEN CFUNC                                                00840900
+            END-EXEC.                                                   00841000
+                                                                        00842000
+            OPEN OUTPUT RELDBJN.                                        00843008
+                                                                        00844007
+       1100-99-FIM.                   EXIT.                             00845000
+      *----------------------------------------------------             00846000
+                                                                        00847000
+      *----------------------------------------------------             00848000
+       1200-TESTAR-STATUS                        SECTION.               00849000
+            EVALUATE SQLCODE                                            00850000
+              WHEN 0                                                    00860000
+                PERFORM 4000-LER-REGISTRO                               00870000
+              WHEN 100                                                  00880000
+                DISPLAY 'SEM REGISTROS '                                00890000
+              WHEN OTHER                                                00900000
+                MOVE SQLCODE TO WRK-SQLCODE                             00910000
+                DISPLAY 'ERRO NO OPEN CURSOR ' WRK-SQLCODE              00911000
+                MOVE 200 TO RETURN-CODE                                 00912000
+                STOP RUN                                                00913000
+            END-EVALUATE.                                               00914000
+                                                                        00914107
+            IF WRK-FS-RELDBJN NOT EQUAL ZEROES                          00914207
+               DISPLAY 'ERRO NO OPEN RELDBJN '                          00914307
+               STOP RUN                                                 00914407
+            END-IF.                                                     00914507
+                                                                        00915000
+       1200-99-FIM.             EXIT.                                   00918300
+      *----------------------------------------------------             00918400
+                                                                        00918500
+                                                                        00918600
+      *----------------------------------------------------             00918700
+       2000-PROCESSAR                            SECTION.               00918800
+      *----------------------------------------------------             00918900
+                                                                        00919000
+            EVALUATE SQLCODE                                            00940000
+               WHEN 0                                                   00950000
+                 PERFORM 2100-MOVE-DADOS                                00960000
+                 WRITE FD-RELDBJN FROM WRK-RELDBJN                      00971007
+               WHEN 100                                                 00980000
+                 MOVE '---FINAL DA TABELA---' TO WRK-MSGFIN             00981007
+                 WRITE FD-RELDBJN FROM WRK-LIN-BRANC                    00990007
+                 WRITE FD-RELDBJN FROM WRK-MSGFIN                       00991007
+               WHEN OTHER                                               01000000
+                 MOVE SQLCODE TO WRK-SQLCODE                            01010000
+                 DISPLAY 'ERRO NA LEITURA ' WRK-SQLCODE                 01020000
+             END-EVALUATE.                                              01030000
+                                                                        01040000
+             PERFORM 4000-LER-REGISTRO.                                 01050000
+                                                                        01060000
+      *----------------------------------------------------             01070000
+       2000-99-FIM.             EXIT.                                   01080000
+      *----------------------------------------------------             01090000
+      *----------------------------------------------------             01100000
+       2100-MOVE-DADOS                           SECTION.               01110000
+                                                                        01120000
+            MOVE DB2-ID        TO WRK-ID-DSP.                           01130001
+            MOVE DB2-NOME      TO WRK-NOME-DSP.                         01140001
+            MOVE DB2-SALARIO   TO WRK-SALARIO-DSP.                      01160001
+            MOVE DB2-DATAADM   TO WRK-DATAADM-DSP.                      01170001
+            MOVE DB2-DESCSETOR TO WRK-DESCSETOR-DSP.                    01171001
+            IF WRK-NULL-EMAIL EQUAL 0                                   01180000
+               MOVE DB2-EMAIL TO WRK-EMAIL-DSP                          01190001
+            ELSE                                                        01200000
+               MOVE '-------' TO WRK-EMAIL-DSP                          01210001
+            END-IF.                                                     01220000
+                                                                        01230000
+                                                                        01240000
+       2100-99-FIM.             EXIT.                                   01250000
+      *----------------------------------------------------             01260000
+      *----------------------------------------------------             01270000
+       3000-FINALIZAR                            SECTION.               01280000
+      *----------------------------------------------------             01290000
+                                                                        01300000
+            EXEC SQL                                                    01310000
+              CLOSE CFUNC                                               01320000
+            END-EXEC.                                                   01330000
+                                                                        01331008
+            CLOSE RELDBJN.                                              01332008
+                                                                        01340000
+            DISPLAY WRK-LIN-BRANC.                                      01370014
+            DISPLAY WRK-MSGFIN.                                         01380014
+                                                                        01390000
+      *----------------------------------------------------             01400000
+       3000-99-FIM.             EXIT.                                   01410000
+      *----------------------------------------------------             01420000
+                                                                        01430000
+      *----------------------------------------------------             01440000
+       4000-LER-REGISTRO                         SECTION.               01450000
+      *----------------------------------------------------             01460000
+                                                                        01470000
+            EXEC SQL                                                    01480000
+              FETCH CFUNC                                               01490000
+              INTO :DB2-ID,                                             01500000
+                   :DB2-NOME,                                           01510000
+                   :DB2-SALARIO,                                        01530000
+                   :DB2-DATAADM,                                        01540000
+                   :DB2-EMAIL     :WRK-NULL-EMAIL,                      01550001
+                   :DB2-DESCSETOR                                       01551001
+            END-EXEC.                                                   01560000
+                                                                        01570000
+            EVALUATE SQLCODE                                            01580000
+              WHEN 0                                                    01590000
+                 CONTINUE                                               01600000
+              WHEN 100                                                  01610000
+                MOVE '----FINAL DA TABELA----' TO WRK-MSGFIN            01611007
+                WRITE FD-RELDBJN FROM WRK-MSGFIN                        01620007
+              WHEN OTHER                                                01630000
+                MOVE SQLCODE TO WRK-SQLCODE                             01640000
+                DISPLAY 'ERRO NO READ TABELA ' WRK-SQLCODE              01650000
+            END-EVALUATE.                                               01660000
+                                                                        01670000
+      *----------------------------------------------------             01680000
+       4000-99-FIM.             EXIT.                                   01690000
+      *----------------------------------------------------             01700000

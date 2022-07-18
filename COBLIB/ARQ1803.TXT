@@ -1,0 +1,155 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00031000
+       PROGRAM-ID. ARQ1803.                                             00032000
+                                                                        00033000
+      *======================================================*          00051000
+      *  PROGRAMADOR: PITER FANTI                            *          00052000
+      *  INSTRUTOR  : IVAN SANCHES                           *          00053000
+      *  EMPRESA    : FOURSYS                                *          00054000
+      *  DATA       : 13/05/2022                             *          00055000
+      *------------------------------------------------------*          00056000
+      *  OBJETIVO   : COPIA APRIMORADA DO ARQ1802 DEIXANDO-O *          00057000
+      *               NOS PADROES DE FORMATACAO E COMENTARIOS*          00058000
+      *               DO DIA A DIA                           *          00059000
+      *------------------------------------------------------*          00059400
+      *  ARQUIVOS   :                                        *          00059500
+      *   DDNAME          I/O                INCLUDE/BOOK    *          00059600
+      *   EREGISTRO        I                       -         *          00059700
+      *======================================================*          00060200
+                                                                        00061000
+      *====================================================             00070000
+       ENVIRONMENT                               DIVISION.              00080000
+      *====================================================             00090000
+       CONFIGURATION                             SECTION.               00100000
+       SPECIAL-NAMES.                                                   00110000
+           DECIMAL-POINT IS COMMA.                                      00120000
+      *----------------------------------------------------             00130000
+       INPUT-OUTPUT                              SECTION.               00140000
+       FILE-CONTROL.                                                    00141000
+           SELECT REGISTRO ASSIGN TO REGISTRO                           00142000
+               FILE STATUS IS WRK-FS-REGISTRO.                          00143000
+                                                                        00144000
+      *====================================================             00145000
+       DATA                                      DIVISION.              00146000
+      *====================================================             00147000
+       FILE                                    SECTION.                 00148000
+       FD REGISTRO                                                      00149000
+           RECORDING MODE IS F                                          00150000
+           BLOCK CONTAINS 0 RECORDS.                                    00160000
+                                                                        00170000
+      *-------LRECL-37----------                                        00180000
+       01 FD-REGISTRO PIC X(37).                                        00190000
+                                                                        00195000
+      *----------------------------------------------------             00196000
+       WORKING-STORAGE                         SECTION.                 00197000
+      *----------------------------------------------------             00198000
+      *---STATUS-DA-OPERACAO-------------------                         00199000
+       77 WRK-FS-REGISTRO    PIC 9(02).                                 00200000
+                                                                        00201000
+       01 WRK-REGISTRO.                                                 00201100
+          05 WRK-CODIGO   PIC 9(05).                                    00201200
+          05 WRK-NOME     PIC X(20).                                    00201300
+          05 WRK-CODCARGO PIC X(04).                                    00201400
+          05 WRK-SALARIO  PIC 9(06)V99.                                 00201500
+                                                                        00201600
+                                                                        00201700
+      *---QNT-REGISTROS-E-QNT-DE-ANALISTAS-----                         00202000
+       77 WRK-QNTREG         PIC 9(02)    VALUE ZEROES.                 00203000
+       77 WRK-QNTAN          PIC 9(02)    VALUE ZEROES.                 00204000
+                                                                        00204100
+      *---SOMA-SALARIOS-TOTAIS-E-DE-ANALISTAS--                         00204200
+       77 WRK-SOMA-SAL       PIC 9(07)V99 VALUE ZEROES.                 00204400
+       77 WRK-SOMA-SAL-AN    PIC 9(07)V99 VALUE ZEROES.                 00204500
+                                                                        00204600
+      *----MASCARAS-DOS-SALARIOS---------------                         00204700
+       77 WRK-SOMA-SAL-ED    PIC $Z.ZZZ.ZZ9,99.                         00204800
+       77 WRK-SOMA-SAL-AN-ED PIC $Z.ZZZ.ZZ9,99.                         00204900
+                                                                        00205000
+      *----FORMATACAO-DO-DISPLAY---------------                         00205100
+       77 WRK-PULA-LINHA     PIC X(01)    VALUE SPACES.                 00205200
+       77 WRK-PONTILHADO     PIC X(37)    VALUE ALL '-'.                00205300
+      *====================================================             00205400
+       PROCEDURE                                 DIVISION.              00205500
+      *====================================================             00205600
+                                                                        00205700
+      *----------------------------------------------------             00205800
+       0000-PRINCIPAL                            SECTION.               00205900
+      *----------------------------------------------------             00206000
+           PERFORM 1000-INICIAR.                                        00207000
+           PERFORM 2000-PROCESSAR UNTIL WRK-FS-REGISTRO EQUAL '10'.     00208000
+           PERFORM 3000-FINALIZAR.                                      00209000
+                                                                        00210000
+           STOP RUN.                                                    00220000
+      *----------------------------------------------------             00230000
+       0000-99-FIM.                       EXIT.                         00240000
+      *----------------------------------------------------             00250000
+                                                                        00260000
+      *----------------------------------------------------             00270000
+       1000-INICIAR                              SECTION.               00280000
+      *----------------------------------------------------             00290000
+           OPEN INPUT REGISTRO.                                         00300000
+              IF WRK-FS-REGISTRO EQUAL '35'                             00310000
+                 DISPLAY 'ARQUIVO NAO EXISTE'                           00320000
+                 STOP RUN                                               00330000
+              ELSE                                                      00331000
+                 PERFORM 4000-TESTAR-VAZIO                              00332000
+                 DISPLAY '--------RELATORIO DE CLIENTES-------'         00333000
+                 DISPLAY WRK-PULA-LINHA                                 00334000
+              END-IF.                                                   00335000
+      *----------------------------------------------------             00335100
+       1000-99-FIM.            EXIT.                                    00335200
+      *----------------------------------------------------             00335300
+                                                                        00335400
+      *----------------------------------------------------             00335500
+       2000-PROCESSAR                            SECTION.               00335600
+      *----------------------------------------------------             00335700
+              DISPLAY WRK-CODIGO WRK-NOME WRK-CODCARGO.                 00335900
+              ADD 1 TO WRK-QNTREG.                                      00337000
+              ADD WRK-SALARIO TO WRK-SOMA-SAL.                          00338000
+                                                                        00339000
+      *-------SE COD = 0234 ANALISTA--------------                      00339100
+              IF WRK-CODCARGO EQUAL 0234                                00339200
+                 ADD 1 TO WRK-QNTAN                                     00339300
+                 ADD WRK-SALARIO TO WRK-SOMA-SAL-AN                     00339400
+              END-IF.                                                   00339500
+                                                                        00339600
+              PERFORM 4000-TESTAR-VAZIO.                                00339700
+      *----------------------------------------------------             00339800
+       2000-99-FIM.            EXIT.                                    00339900
+      *----------------------------------------------------             00340000
+                                                                        00341000
+      *----------------------------------------------------             00341100
+       3000-FINALIZAR                            SECTION.               00341200
+      *----------------------------------------------------             00341300
+           CLOSE REGISTRO.                                              00341400
+              MOVE WRK-SOMA-SAL    TO WRK-SOMA-SAL-ED.                  00341500
+              MOVE WRK-SOMA-SAL-AN TO WRK-SOMA-SAL-AN-ED.               00341600
+                                                                        00341700
+              DISPLAY WRK-PULA-LINHA                                    00341800
+              DISPLAY 'TOTAL DE REGISTROS LIDOS: ' WRK-QNTREG.          00341900
+              DISPLAY 'TOTAL DE REGISTROS DE ANALISTA: ' WRK-QNTAN.     00342000
+              DISPLAY WRK-PULA-LINHA                                    00342100
+              DISPLAY 'SALARIO TOTAL: ' WRK-SOMA-SAL-ED.                00342200
+              DISPLAY 'SALARIO TOTAL (ANALISTAS): '                     00342300
+                                        WRK-SOMA-SAL-AN-ED.             00342400
+              DISPLAY WRK-PULA-LINHA                                    00342500
+              DISPLAY '-----------FIM DO RELATORIO----------'.          00342600
+      *----------------------------------------------------             00342700
+       3000-99-FIM.             EXIT.                                   00342800
+      *----------------------------------------------------             00342900
+                                                                        00343000
+      *----------------------------------------------------             00344000
+       4000-TESTAR-VAZIO                         SECTION.               00345000
+      *----------------------------------------------------             00346000
+           READ REGISTRO INTO WRK-REGISTRO.                             00347000
+              IF WRK-FS-REGISTRO EQUAL 10                               00348000
+                   DISPLAY WRK-PULA-LINHA                               00349000
+                   DISPLAY WRK-PONTILHADO                               00350000
+                   DISPLAY '------------FINAL DE ARQUIVO---------'      00360000
+                   DISPLAY WRK-PONTILHADO                               00370000
+              END-IF.                                                   00380000
+      *----------------------------------------------------             00390000
+       4000-99-FIM.             EXIT.                                   00400000
+      *----------------------------------------------------             00410000

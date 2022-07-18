@@ -1,0 +1,131 @@
+      *==================================================               00001000
+       IDENTIFICATION DIVISION.                                         00002000
+      *==================================================               00003000
+                                                                        00004000
+       PROGRAM-ID. F18CIP2.                                             00005000
+                                                                        00006000
+      *==========================================================*      00007000
+      *  INSTRUTOR  : IVAN SANCHES                               *      00008000
+      *  AUTOR      : PITER FANTI                                *      00010000
+      *  EMPRESA    : FOURSYS                                    *      00020000
+      *----------------------------------------------------------*      00020100
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO  *      00020200
+      *   1.0   28/06/22  PITER FANTI  VERSAO INICIAL            *      00020300
+      *   1.1   29/06/22  PITER FANTI  MODIFICACAO DO PROGRAMA   *      00020420
+      *                                PARA DEVOLVER A TRANSACAO *      00020520
+      *                                APENAS O REGISTRO NO CICS *      00020620
+      *                                CONSULTADO SEM USAR O MAPA*      00020720
+      *----------------------------------------------------------*      00021200
+      *  OBJETIVO   : PROGRAMA DE LEITURA DA TABELA VSAM 'FUNC'  *      00021343
+      *               E MOSTRAR NO CICS O REGISTRO CONSULTADO    *      00021443
+      *               SEM USO DE MAPA                            *      00021543
+      *==========================================================*      00021700
+                                                                        00021800
+      *==================================================               00021900
+       DATA DIVISION.                                                   00022000
+      *==================================================               00023000
+       WORKING-STORAGE SECTION.                                         00024000
+      *==================================================               00025000
+                                                                        00042000
+            COPY DFHAID.                                                00043100
+                                                                        00044000
+      *-------------------------------------------                      00045000
+       01 FILLER PIC X(70)                                              00046000
+              VALUE 'VARIAVEL DA TRANSACAO E RECEBIMENTO DE DADOS'.     00046120
+      *-------------------------------------------                      00047000
+       01 WRK-ENTRADA.                                                  00047120
+          05 WRK-TRANS    PIC X(04).                                    00047221
+          05 WRK-ID       PIC X(05).                                    00047421
+          05 WRK-NOME     PIC X(30) VALUE SPACES.                       00047520
+          05 WRK-SETOR    PIC X(04) VALUE SPACES.                       00047620
+          05 WRK-SALARIO  PIC X(10) VALUE SPACES.                       00047720
+          05 WRK-DATAADM  PIC X(02) VALUE SPACES.                       00047825
+          05 WRK-EMAIL    PIC X(40) VALUE SPACES.                       00049020
+          05 WRK-STATUS   PIC X(01) VALUE SPACES.                       00049120
+                                                                        00049333
+      *-------------------------------------------                      00050020
+       01 FILLER PIC X(70)                                              00050120
+              VALUE 'VARIAVEL DE LEITURA E ENVIO DE DADOS'.             00050220
+      *-------------------------------------------                      00050320
+       01 WRK-DADOS.                                                    00050420
+          05 WRK-CHAVE    PIC X(05) VALUE SPACES.                       00050520
+          05 WRK-NOME     PIC X(30) VALUE SPACES.                       00050620
+          05 WRK-SETOR    PIC X(04) VALUE SPACES.                       00050720
+          05 WRK-SALARIO  PIC X(10) VALUE SPACES.                       00050820
+          05 WRK-DATAADM  PIC X(10) VALUE SPACES.                       00050925
+          05 WRK-EMAIL    PIC X(40) VALUE SPACES.                       00051433
+                                                                        00051620
+      *----------------------------------------------                   00051720
+       01 FILLER PIC X(70)                                              00051820
+              VALUE 'VARIAVEIS DE STATUS'.                              00051921
+      *----------------------------------------------                   00052020
+       77 WRK-RESP        PIC S9(04) COMP.                              00052120
+                                                                        00052320
+      *==================================================               00053000
+       PROCEDURE                         DIVISION.                      00054000
+      *==================================================               00055000
+                                                                        00056000
+      *----------------------------------------------------             00057000
+       0000-PRINCIPAL                            SECTION.               00058000
+      *----------------------------------------------------             00059000
+           PERFORM 1000-INICIAR.                                        00060000
+           PERFORM 2000-PROCESSAR                                       00070020
+                                                                        00071020
+            EXEC CICS SEND                                              00071120
+              FROM(WRK-ENTRADA)                                         00071221
+              ERASE                                                     00071320
+            END-EXEC.                                                   00071420
+                                                                        00071520
+            EXEC CICS                                                   00072000
+              RETURN                                                    00073029
+            END-EXEC.                                                   00074027
+      *-----------------------------------------------------            00075000
+       0000-99-FIM.       EXIT.                                         00076000
+      *-----------------------------------------------------            00077000
+                                                                        00078000
+      *----------------------------------------------------             00079000
+       1000-INICIAR                              SECTION.               00079100
+      *----------------------------------------------------             00079200
+               EXEC CICS RECEIVE                                        00079421
+                  INTO(WRK-ENTRADA)                                     00079721
+               END-EXEC.                                                00079920
+                                                                        00080036
+               IF WRK-ID IS NOT NUMERIC OR WRK-ID EQUAL '00000'         00090036
+                  MOVE 'X' TO WRK-STATUS                                00090336
+               END-IF.                                                  00090436
+      *-----------------------------------------------------            00090818
+       1000-99-FIM.       EXIT.                                         00090918
+      *-----------------------------------------------------            00091018
+                                                                        00091118
+      *----------------------------------------------------             00091218
+       2000-PROCESSAR                            SECTION.               00091318
+      *----------------------------------------------------             00091418
+            MOVE WRK-ID TO WRK-CHAVE.                                   00091530
+            EXEC CICS READ                                              00133925
+              FILE ('FUNC')                                             00134025
+              RIDFLD(WRK-CHAVE)                                         00134125
+              INTO(WRK-DADOS)                                           00134225
+              RESP(WRK-RESP)                                            00134325
+            END-EXEC.                                                   00134425
+                                                                        00134506
+            IF WRK-RESP EQUAL DFHRESP(NORMAL)                           00134625
+               MOVE CORR WRK-DADOS TO WRK-ENTRADA                       00134825
+               MOVE '1' TO WRK-STATUS                                   00134930
+               IF WRK-EMAIL OF WRK-DADOS EQUAL SPACES                   00135925
+                  MOVE '4' TO WRK-STATUS                                00136125
+               END-IF                                                   00136225
+               IF WRK-SALARIO OF WRK-DADOS EQUAL ZEROES OR              00136325
+                  WRK-SALARIO OF WRK-DADOS IS NOT NUMERIC               00136425
+                  MOVE '3' TO WRK-STATUS                                00136625
+                  END-IF                                                00136725
+            END-IF.                                                     00136825
+            IF WRK-RESP EQUAL DFHRESP(NOTFND)                           00136925
+               MOVE '2' TO WRK-STATUS                                   00137125
+            END-IF.                                                     00138025
+            IF WRK-STATUS NOT EQUAL 1                                   00139042
+               INITIALIZE WRK-DADOS                                     00140042
+               MOVE CORR WRK-DADOS TO WRK-ENTRADA                       00150042
+            END-IF.                                                     00151042
+      *-----------------------------------------------------            00160018
+       2000-99-FIM.       EXIT.                                         00170018
+      *-----------------------------------------------------            00180018

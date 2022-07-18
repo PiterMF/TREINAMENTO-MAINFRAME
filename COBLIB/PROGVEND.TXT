@@ -1,0 +1,84 @@
+       IDENTIFICATION DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       PROGRAM-ID. VENDAS.
+       ENVIRONMENT DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT IS COMMA.
+      *-----------------------
+       INPUT-OUTPUT SECTION.
+      *-----------------------
+       DATA DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       FILE SECTION.
+      *-----------------------
+       WORKING-STORAGE SECTION.
+       01 WRK-DATA.
+          05 WRK-IDVEND     PIC 9(02) VALUE ZEROES.
+          05 WRK-VALOR   PIC 9(05) VALUE ZEROES.
+
+
+       01 WRK-VENDEDORES.
+          05 FILLER PIC X(10) VALUE 'PITER     '.
+          05 FILLER PIC X(10) VALUE 'RODRIGO   '.
+          05 FILLER PIC X(10) VALUE 'EMILIA    '.
+
+       01 FILLER REDEFINES WRK-VENDEDORES.
+           05 NOME-VEND PIC X(10) OCCURS 3 TIMES.
+
+       01 FILLER.
+          05 TOT-VENDEDOR  PIC 9(06) OCCURS 3 TIMES.
+
+
+       77 WRK-SOMVEND    PIC 9(07) VALUE ZEROES.
+       77 WRK-REGLID     PIC 9(03) VALUE ZEROES.
+       77 WRK-CONT       PIC 9(02) VALUE ZEROES.
+
+      *-----------------------
+       PROCEDURE DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       0000-PRINCIPAL             SECTION.
+            PERFORM 1000-INICIAR.
+            PERFORM 2000-PROCESSAR UNTIL WRK-IDVEND EQUAL 99.
+            PERFORM 3000-FINALIZAR.
+
+            STOP RUN.
+      *-----------------------------------
+       1000-INICIAR               SECTION.
+      *-----------------------------------
+            ACCEPT WRK-DATA.
+                IF WRK-IDVEND LESS 01
+                    DISPLAY 'FINAL DO PROGRAMA'
+                    STOP RUN
+                END-IF.
+
+      *-----------------------------------
+       2000-PROCESSAR             SECTION.
+      *-----------------------------------
+            ADD WRK-VALOR TO WRK-SOMVEND.
+            ADD 1 TO WRK-REGLID.
+
+            ADD WRK-VALOR TO TOT-VENDEDOR(WRK-IDVEND).
+
+            ACCEPT WRK-DATA.
+                IF WRK-IDVEND EQUAL 00
+                    PERFORM 3000-FINALIZAR
+                END-IF.
+      *-----------------------------------
+       3000-FINALIZAR             SECTION.
+      *-----------------------------------
+
+            PERFORM 3100-DISPLAY-VEND.
+
+            DISPLAY 'REGISTROS LIDOS: ' WRK-REGLID.
+            DISPLAY 'TOTAL DAS VENDAS: '    WRK-SOMVEND.
+
+       3100-DISPLAY-VEND           SECTION.
+            PERFORM VARYING WRK-CONT FROM 1 BY 1
+                                        UNTIL WRK-CONT GREATER 3
+              DISPLAY NOME-VEND(WRK-CONT) ' -> ' TOT-VENDEDOR(WRK-CONT)
+            END-PERFORM.
+      *-----------------------------------
+       9000-TRATA-ERROS           SECTION.
+      *-----------------------------------

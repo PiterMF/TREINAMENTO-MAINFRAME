@@ -1,0 +1,347 @@
+      *====================================================             00010001
+       IDENTIFICATION                            DIVISION.              00020001
+      *====================================================             00030001
+                                                                        00031001
+       PROGRAM-ID. MD021803.                                            00032001
+                                                                        00033001
+      *=========================================================*       00034001
+      *  AUTOR      : PITER FANTI                               *       00034101
+      *  INSTRUTOR  : IVAN SANCHES                              *       00034201
+      *  EMPRESA    : FOURSYS                                   *       00034301
+      *---------------------------------------------------------*       00034401
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00034501
+      *   1.0   08/07/22  PITER FANTI    VERSAO INICIAL         *       00034601
+      *---------------------------------------------------------*       00034701
+      *  OBJETIVO   : LER O ARQUIVO VSAM PELA CHAVE INDICADA NO *       00034801
+      *               JCL DE EXECUCAO (USO DO PARM) E REALIZAR  *       00034901
+      *               ARIVO EVSA0407 A LEITURA A PARTIR DA CHAVE*       00035001
+      *               (READ NEXT E USO DE SELECT) PARA DISPLAY  *       00035102
+      *               NA SYSOUT                                 *       00035202
+      *---------------------------------------------------------*       00035301
+      *  ARQUIVOS   :                                           *       00035401
+      *   DDNAME          I/O              INCLUDE/BOOK         *       00035523
+      *   EVSA0407         I                 FR18W407           *       00035625
+4SYS18*   SVSA1107         O                    -       11/07/22*       00035723
+4SYS18*   S1107EXC         O                    -       11/07/22*       00035829
+      *---------------------------------------------------------*       00035929
+      *  MODULOS    :                        INCLUDE/BOOK       *       00036029
+      *   GRAVALOG         I                    #GLOGPT         *       00036129
+      *---------------------------------------------------------*       00036229
+4SYS18*                  A L T E R A C O E S                    *       00036329
+      *---------------------------------------------------------*       00036429
+4SYS18* ANALISTA......:PITER MALHEIROS FANTI        4SYS18      *       00036529
+4SYS18* DATA..........:11/07/2020                               *       00036629
+      *---------------------------------------------------------*       00036729
+4SYS18*  OBJETIVO   : IMPLEMENTACAO DA GRAVACAO EM UM ARQUIVO DE*       00036829
+4SYS18*               SAIDA (SVSA1107) E DE EXCESSOES (SALARIO  *       00036929
+4SYS18*               INCONSISTENTE) EM OUTRO ARQUIVO (SVSA1107)*       00037029
+      *=========================================================*       00037127
+                                                                        00037227
+      *====================================================             00037327
+       ENVIRONMENT                               DIVISION.              00037427
+      *====================================================             00037527
+       INPUT-OUTPUT                              SECTION.               00037627
+       FILE-CONTROL.                                                    00037727
+           SELECT EVSA0407 ASSIGN TO EVSA0407                           00037827
+               ORGANIZATION IS INDEXED                                  00037927
+               ACCESS MODE  IS SEQUENTIAL                               00038027
+               RECORD KEY   IS FD-EVSA-CHAVE                            00038127
+               FILE STATUS  IS WRK-FS-EVSA0407.                         00038227
+                                                                        00038327
+4SYS18     SELECT SVSA1107 ASSIGN TO SVSA1107                           00038427
+4SYS18         FILE STATUS IS WRK-FS-SVSA1107.                          00038527
+                                                                        00039001
+4SYS18     SELECT S1107EXC ASSIGN TO S1107EXC                           00039129
+4SYS18         FILE STATUS IS WRK-FS-S1107EXC.                          00039229
+                                                                        00039329
+      *====================================================             00040001
+       DATA                                      DIVISION.              00041001
+      *====================================================             00042001
+       FILE                                    SECTION.                 00043001
+       FD EVSA0407.                                                     00044022
+                                                                        00045001
+      *-------LRECL19-----------                                        00046001
+       COPY FR18W407.                                                   00047027
+                                                                        00070001
+4SYS18 FD SVSA1107                                                      00071023
+4SYS18      RECORDING MODE IS F                                         00071123
+4SYS18      BLOCK CONTAINS 0 RECORDS.                                   00071223
+                                                                        00072017
+      *-------LRECL-19----------                                        00073017
+4SYS18 01 FD-SVSA1107           PIC X(19).                              00074023
+                                                                        00080001
+4SYS18 FD S1107EXC                                                      00081027
+4SYS18      RECORDING MODE IS F                                         00082027
+4SYS18      BLOCK CONTAINS 0 RECORDS.                                   00083027
+                                                                        00084027
+      *-------LRECL-19----------                                        00085027
+4SYS18 01 FD-S1107EXC           PIC X(19).                              00086027
+                                                                        00087027
+      *----------------------------------------------------             00090001
+       WORKING-STORAGE                         SECTION.                 00100001
+      *----------------------------------------------------             00110001
+      *------------------------------                                   00110101
+       01 FILLER PIC X(30) VALUE 'AREA DE DADOS PARA OPERACAO'.         00110201
+      *------------------------------                                   00110301
+       01 WRK-EVSA0407.                                                 00111001
+          05 WRK-EVSA-CHAVE.                                            00112001
+             10 WRK-EVSA-AGENCIA PIC X(04).                             00113001
+             10 WRK-EVSA-CONTA   PIC X(05).                             00114001
+          05 WRK-EVSA-SALARIO    PIC X(10).                             00115001
+                                                                        00120001
+      *------------------------------                                   00140001
+       01 FILLER PIC X(30) VALUE 'AREA DE LOG DE ERROS'.                00150001
+      *------------------------------                                   00160001
+           COPY '#GLOGPT'.                                              00162001
+                                                                        00163001
+      *------------------------------                                   00164001
+       01 FILLER PIC X(30) VALUE 'AREA DE DISPLAY'.                     00165001
+      *------------------------------                                   00166001
+       01 WRK-FINAL-REL.                                                00167001
+          05 FILLER PIC X(37) VALUE                                     00168001
+                  '-------FINAL DO PROCESSAMENTO-------'.               00169001
+                                                                        00170001
+       77 WRK-LINBRANC       PIC X(47) VALUE SPACES.                    00180014
+4SYS18 77 WRK-SAIDA-REGISTRO PIC X(19).                                 00180123
+                                                                        00181001
+      *---------------------------------                                00182001
+       77 FILLER PIC X(20) VALUE 'AREA DE STATUS'.                      00183001
+      *---------------------------------                                00184001
+       77 WRK-FS-EVSA0407 PIC 9(02).                                    00185001
+4SYS18 77 WRK-FS-SVSA1107 PIC 9(02).                                    00185123
+4SYS18 77 WRK-FS-S1107EXC PIC 9(02).                                    00185227
+                                                                        00186001
+      *-------LOG-DE-ERROS-------------                                 00187001
+      *77 WRK-GRAVALOG PIC X(08) VALUE 'GRAVALOG'.                      00188001
+                                                                        00189001
+      *-------LENGTH LINKAGE---------                                   00190001
+       77 WRK-LEN      PIC 9(04).                                       00191001
+                                                                        00191101
+      *---------------------------------                                00191217
+4SYS18 77 FILLER PIC X(20) VALUE 'AREA DE CONTADORES'.                  00191323
+      *---------------------------------                                00191417
+4SYS18 77 WRK-CONT-LID    PIC 9(02) VALUE ZEROES.                       00191627
+4SYS18 77 WRK-CONT-GRAV   PIC 9(02) VALUE ZEROES.                       00191727
+4SYS18 77 WRK-CONT-N-GRAV PIC 9(02) VALUE ZEROES.                       00191827
+                                                                        00191927
+      *----------------------------------------------------             00192027
+       LINKAGE                                   SECTION.               00192127
+      *----------------------------------------------------             00192227
+       01 LNK-ENTRADA.                                                  00192327
+          05 LNK-LEN      PIC 9(04) COMP.                               00192427
+          05 LNK-CORPO.                                                 00192527
+             10 LNK-CHAVE.                                              00192627
+                15 LNK-AGENCIA PIC X(04).                               00192727
+                15 LNK-CONTA   PIC X(05).                               00192827
+4SYS18       10 LNK-CHAVE-F.                                            00192927
+  .             15 LNK-AGENCIA-F PIC X(04).                             00193027
+4SYS18          15 LNK-CONTA-F   PIC X(05).                             00193127
+      *====================================================             00193227
+       PROCEDURE DIVISION USING LNK-ENTRADA.                            00193327
+      *====================================================             00193427
+                                                                        00193527
+      *----------------------------------------------------             00193627
+       0000-PRINCIPAL                            SECTION.               00193727
+      *----------------------------------------------------             00193827
+           PERFORM 1000-INICIAR.                                        00193927
+           PERFORM 2000-PROCESSAR.                                      00194027
+           PERFORM 3000-FINALIZAR.                                      00194127
+                                                                        00194227
+           STOP RUN.                                                    00194327
+      *----------------------------------------------------             00194427
+       0000-99-FIM.                       EXIT.                         00194527
+      *----------------------------------------------------             00194627
+                                                                        00194727
+      *----------------------------------------------------             00194827
+       1000-INICIAR                              SECTION.               00194927
+      *----------------------------------------------------             00195027
+           PERFORM 1100-ABRIR-ARQUIVOS.                                 00195127
+           PERFORM 4000-TESTE-STATUS.                                   00195227
+      *----------------------------------------------------             00195327
+       1000-99-FIM.             EXIT.                                   00195427
+      *----------------------------------------------------             00195527
+                                                                        00195627
+      *----------------------------------------------------             00195727
+       1100-ABRIR-ARQUIVOS                       SECTION.               00195827
+           OPEN INPUT  EVSA0407.                                        00195927
+4SYS18     OPEN OUTPUT SVSA1107 S1107EXC.                               00196027
+       1100-99-FIM.                   EXIT.                             00196127
+      *----------------------------------------------------             00196227
+                                                                        00196327
+      *----------------------------------------------------             00196427
+       1200-VERIFICA-L                           SECTION.               00196527
+4SYS18      IF LNK-LEN LESS 18                                          00196627
+  .            DISPLAY 'TAMANHO INVALIDO DE CHAVE: '                    00196727
+  .            DISPLAY 'AAAACCCCCAAAACCCCC'                             00196827
+  .            DISPLAY LNK-CHAVE LNK-CHAVE-F                            00196927
+  .            PERFORM 3000-FINALIZAR                                   00197013
+  .            GOBACK                                                   00198013
+4SYS18      ELSE                                                        00198123
+               MOVE LNK-CHAVE TO FD-EVSA-CHAVE                          00198223
+4SYS18      END-IF.                                                     00198323
+       1200-99-FIM.                   EXIT.                             00198423
+      *----------------------------------------------------             00198501
+                                                                        00198601
+      *----------------------------------------------------             00200001
+       2000-PROCESSAR                            SECTION.               00201001
+      *----------------------------------------------------             00202001
+            PERFORM 1200-VERIFICA-L.                                    00202123
+            START EVSA0407 KEY EQUAL FD-EVSA-CHAVE                      00202204
+              INVALID KEY                                               00202304
+                DISPLAY 'CHAVE NAO ENCONTRADA'                          00202404
+              NOT INVALID KEY                                           00202504
+                READ EVSA0407 NEXT                                      00202627
+                PERFORM 2100-LEITURA                                    00202827
+            END-START.                                                  00202904
+                                                                        00203007
+      *----------------------------------------------------             00209001
+       2000-99-FIM.             EXIT.                                   00210001
+      *----------------------------------------------------             00211001
+                                                                        00213001
+      *----------------------------------------------------             00214001
+       2100-LEITURA                               SECTION.              00215004
+            PERFORM UNTIL WRK-FS-EVSA0407 EQUAL 10                      00217204
+4SYS18         IF FD-EVSA-CHAVE LESS OR EQUAL LNK-CHAVE-F               00217323
+  .               MOVE FD-EVSA0407 TO WRK-EVSA0407                      00218128
+  .               STRING FD-EVSA-AGENCIA DELIMITED BY SIZE              00218223
+  .                      FD-EVSA-CONTA   DELIMITED BY SIZE              00218323
+  .                      FD-EVSA-SALARIO DELIMITED BY SIZE              00218423
+  .                         INTO WRK-SAIDA-REGISTRO                     00218523
+  .               PERFORM 2200-CONSISTIR-GRAVACAO                       00218627
+  .            ELSE                                                     00219223
+  .               GO TO 2100-99-FIM                                     00219323
+  .            END-IF                                                   00220023
+4SYS18         ADD 1 TO WRK-CONT-LID                                    00230023
+               READ EVSA0407 NEXT                                       00244104
+            END-PERFORM.                                                00244304
+       2100-99-FIM.                   EXIT.                             00245004
+      *----------------------------------------------------             00246001
+                                                                        00264401
+      *----------------------------------------------------             00264527
+4SYS18 2200-CONSISTIR-GRAVACAO              SECTION.                    00264627
+  .         IF FD-EVSA-SALARIO EQUAL ZEROES OR                          00264727
+  .            FD-EVSA-SALARIO IS NOT NUMERIC                           00264827
+  .               WRITE  FD-S1107EXC FROM WRK-SAIDA-REGISTRO            00264927
+  .               ADD 1 TO WRK-CONT-N-GRAV                              00265027
+  .         ELSE                                                        00265227
+  .               WRITE  FD-SVSA1107 FROM WRK-SAIDA-REGISTRO            00265327
+  .               ADD 1 TO WRK-CONT-GRAV                                00265427
+  .         END-IF.                                                     00266327
+4SYS18 2200-99-FIM.                   EXIT.                             00266427
+      *----------------------------------------------------             00266527
+                                                                        00266627
+      *----------------------------------------------------             00266727
+       3000-FINALIZAR                            SECTION.               00266827
+      *----------------------------------------------------             00266927
+           PERFORM 3100-DISPLAY-FINAL.                                  00267027
+           PERFORM 3200-FECHAR.                                         00267127
+      *----------------------------------------------------             00267227
+       3000-99-FIM.             EXIT.                                   00267327
+      *----------------------------------------------------             00267427
+                                                                        00268001
+      *----------------------------------------------------             00269001
+       3100-DISPLAY-FINAL                        SECTION.               00270001
+4SYS18     DISPLAY WRK-LINBRANC.                                        00270123
+  .        DISPLAY 'REGISTROS LIDOS:        ' WRK-CONT-LID.             00271027
+  .        DISPLAY 'REGISTROS GRAVADOS:     ' WRK-CONT-GRAV.            00272027
+4SYS18     DISPLAY 'REGISTROS NAO GRAVADOS: ' WRK-CONT-N-GRAV.          00273027
+           DISPLAY WRK-LINBRANC.                                        00280001
+           DISPLAY WRK-FINAL-REL.                                       00290001
+       3100-99-FIM.         EXIT.                                       00300001
+      *----------------------------------------------------             00310001
+                                                                        00311001
+      *----------------------------------------------------             00312001
+       3200-FECHAR                               SECTION.               00313023
+           CLOSE EVSA0407 SVSA1107 S1107EXC.                            00314027
+4SYS18     PERFORM 3300-TESTE-FECHAR-EVSA0407.                          00315023
+4SYS18     PERFORM 3400-TESTE-FECHAR-SVSA1107.                          00315123
+4SYS18     PERFORM 3500-TESTE-FECHAR-S1107EXC.                          00315227
+       3200-99-FIM.         EXIT.                                       00315327
+      *----------------------------------------------------             00316001
+                                                                        00316117
+      *----------------------------------------------------             00316217
+4SYS18 3300-TESTE-FECHAR-EVSA0407                SECTION.               00316323
+  .        IF WRK-FS-EVSA0407 NOT EQUAL ZEROES                          00316423
+  .           MOVE '3200'                   TO WRK-SECAO                00316523
+  .           MOVE 'ERRO NO CLOSE EVSA0407' TO WRK-MSGERRO              00316623
+  .           MOVE WRK-FS-EVSA0407          TO WRK-STATUS               00316723
+  .           PERFORM 9000-TRATA-ERROS                                  00316823
+  .        END-IF.                                                      00316923
+4SYS18 3300-99-FIM.         EXIT.                                       00317123
+      *----------------------------------------------------             00317217
+                                                                        00317301
+      *----------------------------------------------------             00317417
+4SYS18 3400-TESTE-FECHAR-SVSA1107                SECTION.               00317523
+  .        IF WRK-FS-SVSA1107 NOT EQUAL ZEROES                          00317623
+  .           MOVE '3200'                   TO WRK-SECAO                00317723
+  .           MOVE 'ERRO NO CLOSE SVSA1107' TO WRK-MSGERRO              00317823
+  .           MOVE WRK-FS-SVSA1107          TO WRK-STATUS               00317923
+  .           PERFORM 9000-TRATA-ERROS                                  00318023
+  .        END-IF.                                                      00318123
+4SYS18 3400-99-FIM.         EXIT.                                       00318223
+      *----------------------------------------------------             00318317
+                                                                        00318417
+      *----------------------------------------------------             00318527
+4SYS18 3500-TESTE-FECHAR-S1107EXC                SECTION.               00318627
+  .        IF WRK-FS-S1107EXC NOT EQUAL ZEROES                          00318727
+  .           MOVE '3200'                   TO WRK-SECAO                00318827
+  .           MOVE 'ERRO NO CLOSE S1107EXC' TO WRK-MSGERRO              00318927
+  .           MOVE WRK-FS-S1107EXC          TO WRK-STATUS               00319027
+  .           PERFORM 9000-TRATA-ERROS                                  00319127
+  .        END-IF.                                                      00319227
+4SYS18 3500-99-FIM.         EXIT.                                       00319327
+      *----------------------------------------------------             00319427
+                                                                        00319527
+      *----------------------------------------------------             00319627
+       4000-TESTE-STATUS                         SECTION.               00319727
+4SYS18      PERFORM 4100-TESTE-STATUS-EVSA0407.                         00320023
+4SYS18      PERFORM 4200-TESTE-STATUS-SVSA1107.                         00330023
+4SYS18      PERFORM 4300-TESTE-STATUS-S1107EXC.                         00340027
+       4000-99-FIM.    EXIT.                                            00362001
+      *----------------------------------------------------             00363001
+                                                                        00364001
+      *----------------------------------------------------             00364117
+4SYS18 4100-TESTE-STATUS-EVSA0407                SECTION.               00364223
+           IF WRK-FS-EVSA0407 NOT EQUAL ZEROES                          00364323
+              MOVE '1100'                  TO WRK-SECAO                 00364423
+              MOVE 'ERRO NO OPEN EVSA0407' TO WRK-MSGERRO               00364523
+              MOVE WRK-FS-EVSA0407         TO WRK-STATUS                00364623
+              PERFORM 9000-TRATA-ERROS                                  00364723
+           END-IF.                                                      00364823
+4SYS18 4100-99-FIM.    EXIT.                                            00364923
+      *----------------------------------------------------             00365017
+                                                                        00365117
+      *----------------------------------------------------             00365217
+4SYS18 4200-TESTE-STATUS-SVSA1107                SECTION.               00365323
+  .        IF WRK-FS-SVSA1107 NOT EQUAL ZEROES                          00365423
+  .           MOVE '1100'                  TO WRK-SECAO                 00365523
+  .           MOVE 'ERRO NO OPEN SVSA1107' TO WRK-MSGERRO               00365623
+  .           MOVE WRK-FS-SVSA1107         TO WRK-STATUS                00365727
+  .           PERFORM 9000-TRATA-ERROS                                  00365823
+  .        END-IF.                                                      00365923
+4SYS18 4200-99-FIM.    EXIT.                                            00366023
+      *----------------------------------------------------             00366117
+                                                                        00366217
+      *----------------------------------------------------             00366327
+4SYS18 4300-TESTE-STATUS-S1107EXC                SECTION.               00366427
+  .        IF WRK-FS-S1107EXC NOT EQUAL ZEROES                          00366527
+  .           MOVE '1100'                  TO WRK-SECAO                 00366627
+  .           MOVE 'ERRO NO OPEN S1107EXC' TO WRK-MSGERRO               00366727
+  .           MOVE WRK-FS-S1107EXC         TO WRK-STATUS                00366827
+  .           PERFORM 9000-TRATA-ERROS                                  00366927
+  .        END-IF.                                                      00367027
+4SYS18 4300-99-FIM.    EXIT.                                            00367127
+      *----------------------------------------------------             00367227
+                                                                        00367327
+      *----------------------------------------------------             00367427
+       9000-TRATA-ERROS                          SECTION.               00367527
+      *----------------------------------------------------             00367627
+           MOVE 'MD021803' TO WRK-PROGRAMA.                             00367727
+           DISPLAY WRK-MSGERRO.                                         00367827
+           DISPLAY 'CODIGO VSAM: ' WRK-FS-EVSA0407.                     00367927
+           DISPLAY WRK-FINAL-REL.                                       00368027
+      *    CALL WRK-GRAVALOG USING WRK-DADOS.                           00368127
+           GOBACK.                                                      00368227
+      *----------------------------------------------------             00368327
+       9000-99-FIM.             EXIT.                                   00368427
+      *----------------------------------------------------             00369027

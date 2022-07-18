@@ -1,0 +1,52 @@
+      *================================================================*00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *================================================================*00030000
+       PROGRAM-ID. FR18CB06.                                            00040000
+                                                                        00050000
+      *=========================================================*       00060000
+      *  INSTRUTOR  : IVAN SANCHES                              *       00070001
+      *  AUTOR      : PITER FANTI                               *       00090000
+      *  EMPRESA    : FOURSYS                                   *       00091000
+      *---------------------------------------------------------*       00092000
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00093000
+      *   1.0   16/05/22  PITER FANTI    VERSAO INICIAL         *       00094000
+      *---------------------------------------------------------*       00095000
+      *  OBJETIVO   : PROGRAMA ACEITA DADOS DA SYSIN E IMPRIME  *       00096000
+      *               INTEIRO E EM MAIS 3 VARIAVEIS COM VARIACAO*       00097000
+      *               EM CADA UMA USANDO O REDEFINES            *       00097100
+      *=========================================================*       00098000
+                                                                        00100000
+      *================================================================*00101000
+       ENVIRONMENT                               DIVISION.              00102000
+      *================================================================*00103000
+                                                                        00104000
+      *================================================================*00105000
+       DATA                                      DIVISION.              00106000
+      *================================================================*00107000
+       WORKING-STORAGE                           SECTION.               00108000
+       01 WRK-DADOS.                                                    00109000
+          05 WRK-ID              PIC 9(05)  VALUE ZEROES.               00109100
+          05 WRK-NOME            PIC X(30)  VALUE SPACES.               00109200
+          05 WRK-ENDERECO        PIC X(30)  VALUE SPACES.               00109300
+                                                                        00109400
+       01 WRK-DADOS-RED1         REDEFINES  WRK-DADOS.                  00109500
+          05 WRK-ID-RED1         PIC 9(05).                             00109600
+          05 WRK-NOME-RED1       PIC X(30).                             00109700
+                                                                        00109800
+       01 WRK-DADOS-RED2         REDEFINES  WRK-DADOS.                  00109900
+          05 WRK-ID-RED2         PIC 9(05).                             00110000
+                                                                        00110100
+       01 WRK-END-RED            REDEFINES  WRK-DADOS.                  00110200
+          05 FILLER              PIC 9(05).                             00110600
+          05 FILLER              PIC X(30).                             00110700
+          05 WRK-ENDERECO-RED    PIC X(30).                             00110800
+                                                                        00110900
+      *================================================================*00111000
+       PROCEDURE                                 DIVISION.              00111100
+      *================================================================*00111200
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00111300
+           DISPLAY 'WRK-DADOS........' WRK-DADOS.                       00111400
+           DISPLAY 'WRK-DADOS-RED1...' WRK-DADOS-RED1.                  00112000
+           DISPLAY 'WRK-DADOS-RED2...' WRK-DADOS-RED2.                  00113000
+           DISPLAY 'WRK-ENDERECO-RED.' WRK-ENDERECO-RED.                00114000
+           STOP RUN.                                                    00120000

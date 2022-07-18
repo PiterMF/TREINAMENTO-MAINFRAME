@@ -1,0 +1,195 @@
+      *====================================================             00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *====================================================             00030000
+                                                                        00040000
+       PROGRAM-ID. FR18DB05.                                            00050004
+                                                                        00060000
+      *=========================================================*       00070000
+      *  GERENTE DO : IVAN SANCHES                              *       00080000
+      *  PROJETO                                                *       00090000
+      *  AUTOR      : PITER FANTI                               *       00100000
+      *  EMPRESA    : FOURSYS                                   *       00110000
+      *---------------------------------------------------------*       00120000
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00130000
+      *   1.0   09/06/22  PITER FANTI    VERSAO INICIAL         *       00140000
+      *---------------------------------------------------------*       00150000
+      *  OBJETIVO   : DB2: PROGRAMA QUE LE TABELA DB2 E FAZ     *       00160000
+      *               UPDATE TROCANDO ELEMENTOS DE UM REGISTRO  *       00170000
+      *---------------------------------------------------------*       00180000
+      *   BASE DE DADOS:                                        *       00190000
+      *   DDNAME          I/O                INCLUDE/BOOK       *       00200000
+      *    IVAN.FUNC       I                    #BKFUNC         *       00210000
+      *=========================================================*       00220000
+                                                                        00230000
+      *====================================================             00240000
+       ENVIRONMENT                               DIVISION.              00250000
+      *====================================================             00260000
+       INPUT-OUTPUT                              SECTION.               00270000
+      *====================================================             00280000
+       DATA                                      DIVISION.              00290000
+      *====================================================             00300000
+       FILE                                    SECTION.                 00310000
+      *----------------------------------------------------             00320000
+       WORKING-STORAGE                         SECTION.                 00330000
+      *----------------------------------------------------             00340000
+            EXEC SQL                                                    00350000
+              INCLUDE #BKFUNC                                           00360000
+            END-EXEC.                                                   00370000
+                                                                        00380000
+            EXEC SQL                                                    00390000
+              INCLUDE SQLCA                                             00400000
+            END-EXEC.                                                   00410000
+                                                                        00420000
+      *------VARIAVEIS-PARA-ACCEPT--------------                        00430000
+       01 WRK-ID.                                                       00440000
+          05 FILLER         PIC X(10).                                  00450000
+          05 WRK-ID-AC      PIC 9(05).                                  00460000
+       01 WRK-NOME.                                                     00470000
+          05 FILLER         PIC X(10).                                  00480000
+          05 WRK-NOME-AC    PIC X(30).                                  00490000
+       01 WRK-SETOR.                                                    00500000
+          05 FILLER         PIC X(10).                                  00510000
+          05 WRK-SETOR-AC   PIC X(04).                                  00520000
+       01 WRK-SALARIO.                                                  00530000
+          05 FILLER         PIC X(10).                                  00540000
+          05 WRK-SALARIO-AC PIC 9(08)V99.                               00550000
+       01 WRK-DATAADM.                                                  00560000
+          05 FILLER         PIC X(10).                                  00570000
+          05 WRK-DATAADM-AC PIC X(10).                                  00580000
+       01 WRK-EMAIL.                                                    00590000
+          05 FILLER         PIC X(10).                                  00600000
+          05 WRK-EMAIL-AC   PIC X(40).                                  00610000
+                                                                        00620000
+                                                                        00630000
+      *------VARIAVEIS-DE-DISPLAY-----------------                      00640000
+       77 WRK-MSGFIN    PIC X(30) VALUE '---REGISTRO ALTERADO---'.      00650002
+       77 WRK-LIN-BRANC PIC X(30) VALUE SPACES.                         00660000
+                                                                        00670000
+      *-----MASCARA-PARA-STATUS-SQL-----------                          00680000
+       77 WRK-SQLCODE               PIC -999.                           00690000
+                                                                        00700000
+      *-----MASCARA-PARA-STATUS-SQL-----------                          00701008
+       77 WRK-NULL-EMAIL            PIC S9(04) COMP.                    00702008
+                                                                        00703008
+      *====================================================             00710000
+       PROCEDURE                                 DIVISION.              00720000
+      *====================================================             00730000
+                                                                        00740000
+      *----------------------------------------------------             00750000
+       0000-PRINCIPAL                            SECTION.               00760000
+      *----------------------------------------------------             00770000
+           PERFORM 1000-INICIAR.                                        00780000
+              PERFORM 1100-VERIF-ID.                                    00790000
+           PERFORM 2000-PROCESSAR.                                      00800000
+           PERFORM 3000-FINALIZAR.                                      00810000
+                                                                        00820000
+           STOP RUN.                                                    00830000
+      *----------------------------------------------------             00840000
+       0000-99-FIM.                       EXIT.                         00850000
+      *----------------------------------------------------             00860000
+                                                                        00870000
+      *----------------------------------------------------             00880000
+       1000-INICIAR                              SECTION.               00890000
+      *----------------------------------------------------             00900000
+                                                                        00910000
+            ACCEPT WRK-ID      FROM SYSIN.                              00920000
+            ACCEPT WRK-NOME    FROM SYSIN.                              00930000
+            ACCEPT WRK-SETOR   FROM SYSIN.                              00940000
+            ACCEPT WRK-SALARIO FROM SYSIN.                              00950000
+            ACCEPT WRK-DATAADM FROM SYSIN.                              00960000
+            ACCEPT WRK-EMAIL   FROM SYSIN.                              00970000
+                                                                        00980000
+      *----------------------------------------------------             00990000
+       1000-99-FIM.             EXIT.                                   01000000
+      *----------------------------------------------------             01010000
+                                                                        01020000
+      *----------------------------------------------------             01030000
+       1100-VERIF-ID                             SECTION.               01040000
+                                                                        01050000
+            IF WRK-ID-AC IS NUMERIC AND WRK-ID-AC GREATER ZEROES        01060000
+               CONTINUE                                                 01070000
+            ELSE                                                        01080000
+               DISPLAY 'ID INVALIDO ' WRK-ID-AC                         01090000
+               STOP RUN                                                 01100000
+            END-IF.                                                     01110000
+                                                                        01120000
+                                                                        01300000
+       1100-99-FIM.             EXIT.                                   01310000
+      *----------------------------------------------------             01320000
+                                                                        01330000
+      *----------------------------------------------------             01340000
+       2000-PROCESSAR                            SECTION.               01350000
+      *----------------------------------------------------             01360000
+                                                                        01370000
+            MOVE WRK-ID-AC TO DB2-ID.                                   01380007
+                                                                        01390001
+            EXEC SQL                                                    01400001
+            SELECT ID,NOME,SETOR,SALARIO,DATAADM,EMAIL                  01410005
+              INTO :DB2-ID,                                             01420001
+                   :DB2-NOME,                                           01430001
+                   :DB2-SETOR,                                          01440001
+                   :DB2-SALARIO,                                        01450001
+                   :DB2-DATAADM,                                        01460001
+                   :DB2-EMAIL    :WRK-NULL-EMAIL                        01470008
+              FROM IVAN.FUNC                                            01480001
+             WHERE ID = :DB2-ID                                         01490001
+            END-EXEC.                                                   01500001
+                                                                        01510001
+            IF WRK-NOME-AC    NOT EQUAL DB2-NOME AND                    01512002
+                                   WRK-NOME-AC    NOT EQUAL SPACES      01513002
+               MOVE WRK-NOME-AC    TO DB2-NOME                          01514002
+            END-IF.                                                     01515002
+            IF WRK-SETOR-AC   NOT EQUAL DB2-SETOR AND                   01516002
+                                   WRK-SETOR-AC   NOT EQUAL SPACES      01517002
+               MOVE WRK-SETOR-AC   TO DB2-SETOR                         01518002
+            END-IF.                                                     01519002
+            IF WRK-SALARIO-AC NOT EQUAL DB2-SALARIO AND                 01519102
+                                   WRK-SALARIO-AC IS NUMERIC            01519202
+               MOVE WRK-SALARIO-AC TO DB2-SALARIO                       01519302
+            END-IF.                                                     01519402
+            IF WRK-EMAIL-AC   NOT EQUAL DB2-EMAIL AND                   01519502
+                                   WRK-EMAIL-AC   NOT EQUAL SPACES      01519602
+               MOVE WRK-EMAIL-AC   TO DB2-EMAIL                         01519702
+            END-IF.                                                     01519802
+                                                                        01519902
+            EXEC SQL                                                    01520002
+              UPDATE IVAN.FUNC  SET NOME    = :DB2-NOME,                01520104
+                                    SETOR   = :DB2-SETOR,               01520204
+                                    SALARIO = :DB2-SALARIO,             01520304
+                                    DATAADM = :DB2-DATAADM,             01520404
+                                    EMAIL   = :DB2-EMAIL                01520504
+              WHERE ID = :DB2-ID                                        01520602
+            END-EXEC.                                                   01520702
+                                                                        01550000
+            EVALUATE SQLCODE                                            01560000
+               WHEN 0                                                   01570000
+                 DISPLAY '---DADOS ALTERADOS---'                        01580002
+                 DISPLAY 'ID......: ' DB2-ID                            01590000
+                 DISPLAY 'NOME....: ' DB2-NOME                          01600000
+                 DISPLAY 'SETOR...: ' DB2-SETOR                         01610000
+                 DISPLAY 'SALARIO.: ' DB2-SALARIO                       01620000
+                 DISPLAY 'DATAADM.: ' DB2-DATAADM                       01630000
+                 DISPLAY 'EMAIL...: ' DB2-EMAIL                         01640000
+               WHEN -181                                                01650000
+                 DISPLAY 'DATA FORMATO ERRADO ' WRK-DATAADM-AC          01660000
+               WHEN OTHER                                               01670000
+                 MOVE SQLCODE TO WRK-SQLCODE                            01680000
+                 DISPLAY 'ERRO NO UPDATE ' WRK-SQLCODE                  01690002
+             END-EVALUATE.                                              01700000
+                                                                        01710000
+      *----------------------------------------------------             01720000
+       2000-99-FIM.             EXIT.                                   01730000
+      *----------------------------------------------------             01740000
+                                                                        01750000
+      *----------------------------------------------------             01760000
+       3000-FINALIZAR                            SECTION.               01770000
+      *----------------------------------------------------             01780000
+                                                                        01790000
+            DISPLAY WRK-LIN-BRANC.                                      01800000
+            DISPLAY WRK-MSGFIN.                                         01810000
+                                                                        01820000
+      *----------------------------------------------------             01830000
+       3000-99-FIM.             EXIT.                                   01840000
+      *----------------------------------------------------             01850000
+                                                                        01860000
+                                                                        01870000

@@ -1,0 +1,393 @@
+      *====================================================             00010001
+       IDENTIFICATION                            DIVISION.              00020001
+      *====================================================             00030001
+                                                                        00031001
+       PROGRAM-ID. FR18EX04.                                            00032001
+                                                                        00033001
+      *=========================================================*       00034001
+      *  GERENTE DO : IVAN SANCHES                              *       00034101
+      *  PROJETO                                                *       00034201
+      *  AUTOR      : PITER FANTI                               *       00034301
+      *  EMPRESA    : FOURSYS                                   *       00034401
+      *---------------------------------------------------------*       00034501
+      *  VERSAO   DATA       AUTOR     DESCRICAO DA MODIFICACAO *       00034601
+      *   1.0   01/06/22  PITER FANTI    VERSAO INICIAL         *       00034702
+      *   1.1   02/06/22  PITER FANTI    OTIMIZACAO DE CODIGO   *       00034817
+      *---------------------------------------------------------*       00035001
+      *  OBJETIVO   : BALANCE LINE TIPO 2: ESTE PROGRAMA TEM A  *       00035101
+      *               FINALIDADE DE RECEBER DADOS DOS ARQUIVOS  *       00035201
+      *               DE ENTRADA CLIENTES MOV0106 E RELACIONAR  *       00036002
+      *               (BALANCO) AS CHAVES PARA GRAVAR NO ARQUIVO*       00036101
+      *               DE SAIDA MOV0106A LEVANDO EM CONSIDERACAO *       00036202
+      *               TIPO DA OPERACAO (DEBITAR OU CREDITAR)    *       00036301
+      *               PARA GRAVAR O SALDO ATUAL DO CLIENTE CASO *       00036402
+      *               ELE POSSUA MAIS DE DEZ MIL REAIS NO SALDO,*       00036502
+      *               DO CONTRARIO GRAVAR NO MOV0106C.          *       00036602
+      *---------------------------------------------------------*       00036702
+      *  ARQUIVOS   :                                           *       00036802
+      *   DDNAME          I/O                INCLUDE/BOOK       *       00036902
+      *   ECLIENTES        I                    #CLIEN          *       00037002
+      *   EMOV0106         I                    #MOV0106        *       00037102
+      *   SMOV0106A        O                       -            *       00037202
+      *   SMOV0106C        O                       -            *       00037302
+      *---------------------------------------------------------*       00037402
+      *  MODULOS    :                             BOOK          *       00037502
+      *   GRAVALOG    - TRATAMENTO DE ERROS     (#GLOGPT)       *       00037602
+      *=========================================================*       00037702
+                                                                        00037802
+      *====================================================             00037902
+       ENVIRONMENT                               DIVISION.              00038002
+      *====================================================             00038102
+       INPUT-OUTPUT                              SECTION.               00038202
+       FILE-CONTROL.                                                    00038302
+           SELECT CLIENTES ASSIGN TO CLIENTES                           00039001
+               FILE STATUS IS WRK-FS-CLIENTES.                          00040001
+                                                                        00041001
+           SELECT MOV0106 ASSIGN TO MOV0106                             00042002
+               FILE STATUS IS WRK-FS-MOV0106.                           00043002
+                                                                        00044001
+           SELECT MOV0106A ASSIGN TO MOV0106A                           00045002
+               FILE STATUS IS WRK-FS-MOV0106A.                          00046002
+                                                                        00047001
+           SELECT MOV0106C ASSIGN TO MOV0106C                           00048102
+               FILE STATUS IS WRK-FS-MOV0106C.                          00048202
+                                                                        00048302
+      *====================================================             00049001
+       DATA                                      DIVISION.              00050001
+      *====================================================             00060001
+       FILE                                    SECTION.                 00070001
+       FD CLIENTES                                                      00080001
+           RECORDING MODE IS F                                          00090001
+           LABEL RECORD IS STANDARD                                     00100001
+           BLOCK CONTAINS 0 RECORDS.                                    00110001
+                                                                        00120001
+      *-------LRECL-46----------                                        00130001
+           COPY '#CLIEN'.                                               00140001
+                                                                        00141601
+      *---------------------------------------------                    00141701
+       FD MOV0106                                                       00141802
+           RECORDING MODE IS F                                          00141901
+           LABEL RECORD IS STANDARD                                     00142001
+           BLOCK CONTAINS 0 RECORDS.                                    00143001
+                                                                        00144001
+      *------LRECL-47----------                                         00145001
+           COPY '#MOV0106'.                                             00146002
+                                                                        00150601
+      *----------------------------------------------                   00150701
+       FD MOV0106A                                                      00150803
+           RECORDING MODE IS F                                          00150901
+           LABEL RECORD IS STANDARD                                     00151001
+           BLOCK CONTAINS 0 RECORDS.                                    00152001
+                                                                        00153001
+      *--------LRECL-46--------                                         00154001
+       01 FD-MOV0106A PIC X(46).                                        00155003
+                                                                        00156001
+      *----------------------------------------------                   00156103
+       FD MOV0106C                                                      00156203
+           RECORDING MODE IS F                                          00156303
+           LABEL RECORD IS STANDARD                                     00156403
+           BLOCK CONTAINS 0 RECORDS.                                    00156503
+                                                                        00156603
+      *--------LRECL-46--------                                         00156703
+       01 FD-MOV0106C PIC X(46).                                        00156803
+                                                                        00156903
+      *----------------------------------------------------             00157001
+       WORKING-STORAGE                         SECTION.                 00158001
+      *----------------------------------------------------             00159001
+                                                                        00160001
+      *---DADOS-PARA-GRAVAR----------                                   00161001
+       01 WRK-MOV0106X.                                                 00162003
+          05 WRK-MOVX-CHAVE.                                            00163003
+             10 WRK-MOVX-AGENCIA PIC X(04).                             00164003
+             10 WRK-MOVX-CONTA   PIC X(04).                             00165003
+          05 WRK-MOVX-NOME       PIC X(30).                             00166003
+          05 WRK-MOVX-SALDO      PIC X(08).                             00167003
+                                                                        00168001
+      *-----LOG-DE-ERROS-----                                           00169001
+           COPY '#GLOGPT'.                                              00170001
+                                                                        00180001
+      *-----DISPLAY-FINAL-DO-RELATORIO-----                             00181001
+       01 WRK-FINAL-REL.                                                00182001
+          05 WRK-FIM-REL.                                               00183001
+             10 FILLER PIC X(40) VALUE                                  00184001
+                  '-----------FINAL DO RELATORIO-----------'.           00185001
+                                                                        00186001
+      *------STATUS-E-FORMATACAO--------                                00187003
+       77 WRK-FS-CLIENTES PIC 9(02).                                    00188001
+       77 WRK-FS-MOV0106  PIC 9(02).                                    00189002
+       77 WRK-FS-MOV0106A PIC 9(02).                                    00189104
+       77 WRK-FS-MOV0106C PIC 9(02).                                    00189204
+       77 WRK-LINBRANC    PIC X(47) VALUE SPACES.                       00190103
+       77 WRK-DISP-MSG    PIC X(47) VALUE SPACES.                       00190203
+                                                                        00190301
+      *------CONTADORES-----------------                                00190403
+       77 WRK-REGLIDOS     PIC 9(03) VALUE ZEROES.                      00190503
+       77 WRK-REGRAVADOS-A PIC 9(03) VALUE ZEROES.                      00190603
+       77 WRK-REGRAVADOS-C PIC 9(03) VALUE ZEROES.                      00190703
+                                                                        00190903
+      *-----FLAG-------------------------                               00191001
+       77 WRK-FLAG        PIC 9(01) VALUE ZEROES.                       00191109
+                                                                        00191201
+      *-------LOG-DE-ERROS-------------                                 00191301
+       77 WRK-GRAVALOG PIC X(08) VALUE 'GRAVALOG'.                      00191401
+                                                                        00191501
+      *------VARIAVEIS-DE-CALCULO----------                             00191601
+       77 WRK-CALCULO    PIC 9(08) COMP VALUE ZEROES.                   00191701
+       77 WRK-CALC-MOV   PIC 9(08) COMP VALUE ZEROES.                   00192001
+       77 WRK-DISP-SALDO PIC 9(08) VALUE ZEROES.                        00192101
+                                                                        00192201
+      *====================================================             00192301
+       PROCEDURE                                 DIVISION.              00192401
+      *====================================================             00192501
+                                                                        00192601
+      *----------------------------------------------------             00192701
+       0000-PRINCIPAL                            SECTION.               00192801
+      *----------------------------------------------------             00192901
+           PERFORM 1000-INICIAR.                                        00193001
+             PERFORM 1200-TESTE-VAZIO.                                  00193101
+           PERFORM 2000-PROCESSAR UNTIL WRK-FS-CLIENTES EQUAL 10 AND    00193201
+                                        WRK-FS-MOV0106  EQUAL 10.       00193302
+           PERFORM 3000-FINALIZAR.                                      00193401
+                                                                        00193501
+           STOP RUN.                                                    00193601
+      *----------------------------------------------------             00193701
+       0000-99-FIM.                       EXIT.                         00193801
+      *----------------------------------------------------             00193901
+                                                                        00194001
+      *----------------------------------------------------             00194101
+       1000-INICIAR                              SECTION.               00194201
+      *----------------------------------------------------             00194301
+           PERFORM 1100-ABRIR-ARQUIVOS.                                 00194401
+           PERFORM 4000-TESTE-STATUS.                                   00194601
+      *----------------------------------------------------             00194701
+       1000-99-FIM.             EXIT.                                   00194801
+      *----------------------------------------------------             00194901
+                                                                        00195001
+      *----------------------------------------------------             00196001
+       1100-ABRIR-ARQUIVOS                       SECTION.               00197001
+           OPEN INPUT  CLIENTES MOV0106                                 00198002
+                OUTPUT MOV0106A MOV0106C.                               00199003
+       1100-99-FIM.                   EXIT.                             00200001
+      *----------------------------------------------------             00201001
+                                                                        00202001
+      *----------------------------------------------------             00203001
+       1200-TESTE-VAZIO                           SECTION.              00204001
+      *----------------------------------------------------             00205001
+           READ CLIENTES.                                               00206001
+           READ MOV0106.                                                00207002
+      *----------------------------------------------------             00207301
+       1200-99-FIM.                   EXIT.                             00207401
+      *----------------------------------------------------             00207501
+                                                                        00207601
+      *----------------------------------------------------             00207703
+       1300-ATUALIZA-CLIENTE                      SECTION.              00207803
+      *----------------------------------------------------             00207903
+           MOVE 0 TO WRK-FLAG.                                          00208008
+           ADD 1 TO WRK-REGLIDOS.                                       00208210
+      *----------------------------------------------------             00208403
+       1300-99-FIM.                   EXIT.                             00208503
+      *----------------------------------------------------             00208603
+                                                                        00208703
+      *----------------------------------------------------             00208801
+       2000-PROCESSAR                            SECTION.               00208901
+      *----------------------------------------------------             00209001
+                                                                        00209101
+           EVALUATE TRUE                                                00209201
+              WHEN FD-CHAVE LESS FD-MV-CHAVE                            00210001
+                   PERFORM 2100-MOVE-VARIAVEIS                          00210101
+                                                                        00210203
+      *-------------------AVALIA-SALDO-DO-CLIENTE--------               00210303
+                   IF WRK-MOVX-SALDO LESS 00010000                      00210407
+                      WRITE FD-MOV0106C FROM WRK-MOV0106X               00210503
+                      ADD 1 TO WRK-REGRAVADOS-C                         00210603
+                   ELSE                                                 00210803
+                      WRITE FD-MOV0106A FROM WRK-MOV0106X               00210903
+                      ADD 1 TO WRK-REGRAVADOS-A                         00211003
+                   END-IF                                               00211103
+                    READ CLIENTES                                       00211201
+                     PERFORM 1300-ATUALIZA-CLIENTE                      00211303
+                                                                        00211501
+      *--------QUANDO-HA-OPERACAO-PARA-O-CLIENTE---------               00211603
+              WHEN FD-CHAVE EQUAL FD-MV-CHAVE                           00211701
+                   PERFORM 2050-CALCULO                                 00211801
+                     MOVE 1 TO WRK-FLAG                                 00211901
+                      READ MOV0106                                      00212002
+                       IF WRK-FS-MOV0106 EQUAL 10                       00212102
+                          MOVE HIGH-VALUES TO FD-MV-CHAVE               00213001
+                       END-IF                                           00214001
+                                                                        00215001
+      *--------SE-O-CLIENTE-FOR-MAIOR-QUE-A-OPERACAO-----               00215103
+              WHEN OTHER                                                00216001
+                   MOVE 'CHAVE NAO BATE' TO WRK-MSGERRO                 00217001
+                   DISPLAY WRK-MSGERRO FD-CHAVE FD-NOME                 00218001
+                   GOBACK                                               00219001
+            END-EVALUATE.                                               00220001
+                                                                        00230001
+      *----------------------------------------------------             00240001
+       2000-99-FIM.             EXIT.                                   00250001
+      *----------------------------------------------------             00260001
+                                                                        00270001
+      *----------------------------------------------------             00280001
+       2050-CALCULO                              SECTION.               00290001
+                                                                        00300001
+      *-----CASO-CLIENTE-TENHA-MAIS-DE-UMA-OPERACAO-----                00300103
+           PERFORM 2060-NOVA-OPERACAO.                                  00301001
+                                                                        00302001
+      *-----CALCULA-O-QUE-SERA-DEBITADO-----------------                00302103
+           EVALUATE FD-MV-TIPOMOV-D ALSO FD-MV-TIPOMOV-C                00303016
+              WHEN TRUE ALSO FALSE                                      00304015
+                 IF WRK-CALCULO LESS WRK-CALC-MOV                       00305020
+                    MOVE 'SALDO INSUFICIENTE ' TO WRK-MSGERRO           00306015
+                    DISPLAY WRK-MSGERRO FD-CHAVE FD-NOME                00307015
+                    MOVE WRK-CALCULO TO WRK-DISP-SALDO                  00307121
+                 ELSE                                                   00307415
+                    SUBTRACT WRK-CALCULO FROM WRK-CALC-MOV              00307515
+                                      GIVING WRK-DISP-SALDO             00307613
+                 END-IF                                                 00307715
+                                                                        00308013
+      *-----CALCULA-O-QUE-SERA-CREDITADO----------------                00308103
+           WHEN FALSE ALSO TRUE                                         00308215
+              ADD WRK-CALCULO TO WRK-CALC-MOV                           00308313
+                              GIVING WRK-DISP-SALDO                     00308413
+           END-EVALUATE.                                                00308515
+           DISPLAY FD-NOME WRK-DISP-SALDO.                              00308619
+                                                                        00309301
+       2050-99-FIM.        EXIT.                                        00309401
+      *----------------------------------------------------             00309501
+                                                                        00309601
+      *----------------------------------------------------             00309701
+       2060-NOVA-OPERACAO                        SECTION.               00309801
+                                                                        00309901
+      *----EVITA-GRAVAR-O-SALDO-DO-CLIENTE-ANTERIOR--                   00310003
+           IF WRK-FLAG EQUAL 1                                          00310101
+              MOVE WRK-DISP-SALDO TO WRK-CALCULO                        00310201
+           ELSE                                                         00310401
+              MOVE FD-SALDO       TO WRK-CALCULO                        00310501
+           END-IF.                                                      00310701
+           MOVE FD-MV-VALORMOV TO WRK-CALC-MOV.                         00310820
+                                                                        00310901
+       2060-99-FIM.        EXIT.                                        00311001
+      *----------------------------------------------------             00311101
+                                                                        00311201
+      *----------------------------------------------------             00311301
+       2100-MOVE-VARIAVEIS                       SECTION.               00311401
+                                                                        00311501
+           MOVE FD-CHAVE       TO WRK-MOVX-CHAVE.                       00311603
+           MOVE FD-NOME        TO WRK-MOVX-NOME.                        00311703
+           IF WRK-FLAG EQUAL 1                                          00311801
+              MOVE WRK-DISP-SALDO TO WRK-MOVX-SALDO                     00311903
+           ELSE                                                         00312001
+              MOVE FD-SALDO TO WRK-MOVX-SALDO                           00312103
+           END-IF.                                                      00312201
+                                                                        00312301
+       2100-99-FIM.        EXIT.                                        00312401
+      *----------------------------------------------------             00312501
+                                                                        00312601
+                                                                        00312801
+      *----------------------------------------------------             00314301
+       3000-FINALIZAR                            SECTION.               00314401
+      *----------------------------------------------------             00314501
+           PERFORM 3050-VERIFICA-GRAVADOS.                              00314603
+           PERFORM 3100-DISPLAY-FINAL.                                  00314703
+           PERFORM 3200-FECHAR.                                         00314803
+      *----------------------------------------------------             00314903
+       3000-99-FIM.             EXIT.                                   00315003
+      *----------------------------------------------------             00315103
+                                                                        00315203
+      *----------------------------------------------------             00315303
+       3050-VERIFICA-GRAVADOS                    SECTION.               00315403
+           SUBTRACT WRK-REGLIDOS FROM WRK-REGRAVADOS-A WRK-REGRAVADOS-C.00315512
+           IF WRK-REGLIDOS EQUAL ZEROES                                 00315612
+              MOVE 'QUANTIDADE LIDA DIFERENTE DA GRAVADA'               00315703
+                                          TO WRK-DISP-MSG               00315803
+           ELSE                                                         00315903
+              MOVE 'TODOS OS REGISTROS FORAM GRAVADOS' TO WRK-DISP-MSG  00316003
+           END-IF.                                                      00316103
+       3050-99-FIM.             EXIT.                                   00316203
+      *----------------------------------------------------             00316303
+                                                                        00316403
+      *----------------------------------------------------             00316503
+       3100-DISPLAY-FINAL                        SECTION.               00316603
+           DISPLAY WRK-LINBRANC.                                        00316703
+           DISPLAY WRK-DISP-MSG.                                        00316803
+           DISPLAY WRK-LINBRANC.                                        00316903
+           DISPLAY 'GRAVADOS EM A: ' WRK-REGRAVADOS-A.                  00317003
+           DISPLAY 'GRAVADOS EM C: ' WRK-REGRAVADOS-C.                  00317103
+           DISPLAY 'LIDOS        : ' WRK-REGLIDOS.                      00317203
+           DISPLAY WRK-LINBRANC.                                        00317303
+           DISPLAY WRK-FIM-REL.                                         00318003
+       3100-99-FIM.         EXIT.                                       00319001
+      *----------------------------------------------------             00320001
+                                                                        00330001
+      *----------------------------------------------------             00340001
+       3200-FECHAR                               SECTION.               00341001
+           CLOSE CLIENTES MOV0106 MOV0106A MOV0106C.                    00342003
+       3200-99-FIM.         EXIT.                                       00343001
+      *----------------------------------------------------             00344001
+                                                                        00345001
+                                                                        00347201
+                                                                        00347301
+      *----------------------------------------------------             00347401
+       4000-TESTE-STATUS                         SECTION.               00347501
+      *----------------------------------------------------             00347601
+           PERFORM 4100-STATUS-CLIENTES.                                00347701
+           PERFORM 4200-STATUS-MOV0106.                                 00347802
+           PERFORM 4300-STATUS-MOV0106A.                                00347904
+           PERFORM 4400-STATUS-MOV0106C.                                00348004
+      *----------------------------------------------------             00348104
+       4000-99-FIM.               EXIT.                                 00349001
+      *----------------------------------------------------             00350001
+                                                                        00360001
+      *----------------------------------------------------             00361001
+       4100-STATUS-CLIENTES                      SECTION.               00362001
+           IF WRK-FS-CLIENTES NOT EQUAL ZEROES                          00362101
+              MOVE '1100'                  TO WRK-SECAO                 00362201
+              MOVE 'ERRO NO OPEN CLIENTES' TO WRK-MSGERRO               00362301
+              MOVE WRK-FS-CLIENTES         TO WRK-STATUS                00362401
+              PERFORM 9000-TRATA-ERROS                                  00362501
+           END-IF.                                                      00362601
+       4100-99-FIM.    EXIT.                                            00362701
+      *----------------------------------------------------             00362801
+                                                                        00362901
+      *----------------------------------------------------             00363001
+       4200-STATUS-MOV0106                       SECTION.               00364002
+           IF WRK-FS-MOV0106 NOT EQUAL ZEROES                           00365002
+              MOVE '1100'                 TO WRK-SECAO                  00365101
+              MOVE 'ERRO NO OPEN MOV0106' TO WRK-MSGERRO                00365202
+              MOVE WRK-FS-MOV0106         TO WRK-STATUS                 00365302
+              PERFORM 9000-TRATA-ERROS                                  00365401
+           END-IF.                                                      00365501
+       4200-99-FIM.    EXIT.                                            00365601
+      *----------------------------------------------------             00365701
+                                                                        00365801
+      *----------------------------------------------------             00365901
+       4300-STATUS-MOV0106A                      SECTION.               00366003
+           IF WRK-FS-MOV0106A NOT EQUAL ZEROES                          00366103
+              MOVE '1100'                  TO WRK-SECAO                 00366203
+              MOVE 'ERRO NO OPEN MOV0106A' TO WRK-MSGERRO               00366303
+              MOVE WRK-FS-MOV0106A         TO WRK-STATUS                00366403
+              PERFORM 9000-TRATA-ERROS                                  00366501
+           END-IF.                                                      00366601
+       4300-99-FIM.    EXIT.                                            00366701
+      *----------------------------------------------------             00366801
+                                                                        00366903
+      *----------------------------------------------------             00367003
+       4400-STATUS-MOV0106C                      SECTION.               00367103
+           IF WRK-FS-MOV0106C NOT EQUAL ZEROES                          00367203
+              MOVE '1100'                  TO WRK-SECAO                 00367303
+              MOVE 'ERRO NO OPEN MOV0106C' TO WRK-MSGERRO               00367403
+              MOVE WRK-FS-MOV0106C         TO WRK-STATUS                00367503
+              PERFORM 9000-TRATA-ERROS                                  00367603
+           END-IF.                                                      00367703
+       4400-99-FIM.    EXIT.                                            00367803
+      *----------------------------------------------------             00367903
+                                                                        00368001
+      *----------------------------------------------------             00368101
+       9000-TRATA-ERROS                          SECTION.               00368201
+      *----------------------------------------------------             00369001
+           MOVE 'FR18EX04' TO WRK-PROGRAMA.                             00369103
+           CALL WRK-GRAVALOG USING WRK-DADOS.                           00369201
+           GOBACK.                                                      00369301
+      *----------------------------------------------------             00369401
+       9000-99-FIM.             EXIT.                                   00369501
+      *----------------------------------------------------             00369601

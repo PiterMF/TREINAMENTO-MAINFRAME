@@ -1,0 +1,75 @@
+      *====================================================             00010001
+       IDENTIFICATION                            DIVISION.              00020001
+      *====================================================             00030001
+       PROGRAM-ID. FR18CB16.                                            00040003
+                                                                        00050001
+      *=====================================================            00060001
+      *  AUTOR: PITER FANTI                                             00070001
+      *  EMPRESA: FOURSYS                                               00080001
+      *=====================================================            00090001
+                                                                        00100001
+      *====================================================             00101001
+       ENVIRONMENT                               DIVISION.              00102001
+      *====================================================             00103001
+       CONFIGURATION                             SECTION.               00103201
+       SPECIAL-NAMES.                                                   00103301
+           DECIMAL-POINT IS COMMA.                                      00103401
+                                                                        00103501
+      *====================================================             00103601
+       DATA                                      DIVISION.              00103701
+      *====================================================             00103801
+       WORKING-STORAGE                         SECTION.                 00103901
+       01 WRK-DADOS.                                                    00104001
+          05 WRK-GASOLINA  PIC 9(02)V99           VALUE ZEROES.         00104101
+          05 WRK-ALCOOL    PIC 9(02)V99           VALUE ZEROES.         00105001
+       77 WRK-RELACAO      PIC 9(02)V99           VALUE ZEROES.         00106309
+                                                                        00106406
+      *--------------MASCARAS-------------------------------            00106506
+                                                                        00106606
+       77 WRK-RELACAO-ED   PIC Z9,99.                                   00106706
+       77 WRK-GASOLINA-ED  PIC Z9,99.                                   00106806
+       77 WRK-ALCOOL-ED    PIC Z9,99.                                   00106906
+                                                                        00107001
+      *07000470 (EXEMPLO DE ENTRADA)                                    00107108
+      *====================================================             00107201
+       PROCEDURE                                 DIVISION.              00107301
+      *====================================================             00108001
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00109001
+           MOVE WRK-GASOLINA TO WRK-GASOLINA-ED.                        00109106
+           MOVE WRK-ALCOOL   TO WRK-ALCOOL-ED.                          00109206
+                                                                        00109307
+           DISPLAY 'GASOLINA POR LITRO.......' WRK-GASOLINA-ED.         00109406
+           DISPLAY 'ALCOOL POR LITRO.........' WRK-ALCOOL-ED.           00109506
+                                                                        00109602
+      *---------VALIDACAO DOS VALORES SENDO NUMERICOS-------            00111809
+                                                                        00111902
+           IF WRK-GASOLINA IS NUMERIC AND WRK-ALCOOL IS NUMERIC         00112003
+              PERFORM 0400-RELACAO                                      00112110
+                                                                        00112202
+           ELSE                                                         00112302
+             DISPLAY 'DADOS NAO NUMERICOS INSERIDOS'                    00112402
+                                                                        00112507
+           END-IF.                                                      00112602
+                                                                        00112710
+      *--------------------------------------------------------------   00112812
+       0400-RELACAO                              SECTION.               00112913
+      *--------------------------------------------------------------   00113012
+                                                                        00114012
+             DIVIDE WRK-ALCOOL BY WRK-GASOLINA GIVING WRK-RELACAO       00115012
+               ON SIZE ERROR                                            00116012
+                  DISPLAY 'ERRO NA DIVISAO'                             00117012
+               NOT ON SIZE ERROR                                        00118012
+                  MOVE WRK-RELACAO TO WRK-RELACAO-ED                    00119012
+                  DISPLAY 'RELACAO ALCOOL/GASOLINA......'               00119114
+                                        WRK-RELACAO-ED                  00119212
+                  IF WRK-RELACAO LESS THAN OR EQUAL 0,7                 00119312
+                    DISPLAY 'COMPRE ALCOOL'                             00119412
+                  ELSE                                                  00119512
+                    DISPLAY 'COMPRE GASOLINA'                           00119612
+                  END-IF                                                00119712
+             END-DIVIDE.                                                00119812
+                                                                        00119912
+      *--------------------------------------------------------------   00120012
+       0400-99-FIM.                              EXIT.                  00121013
+      *--------------------------------------------------------------   00122012
+           STOP RUN.                                                    00130001

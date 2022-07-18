@@ -1,0 +1,41 @@
+      *================================================================*00010000
+       IDENTIFICATION                            DIVISION.              00020000
+      *================================================================*00030000
+       PROGRAM-ID. FR18CB13.                                            00040000
+                                                                        00050000
+      *================================================================*00060000
+      *  AUTOR:   PITER FANTI                                           00070000
+      *  EMPRESA: FOURSYS                                               00080000
+      *================================================================*00090000
+                                                                        00100000
+      *================================================================*00101000
+       ENVIRONMENT                               DIVISION.              00102000
+      *================================================================*00103000
+       CONFIGURATION                             SECTION.               00103109
+       SPECIAL-NAMES.                                                   00103209
+           DECIMAL-POINT IS COMMA.                                      00104009
+      *================================================================*00105000
+       DATA                                      DIVISION.              00106000
+      *================================================================*00107000
+       WORKING-STORAGE                           SECTION.               00108000
+       01 WRK-DADOS.                                                    00109000
+          05 WRK-MES     PIC 9(02)         VALUE ZEROES.                00109209
+          05 WRK-TOTVEND PIC 9(08)         VALUE ZEROES.                00109309
+          05 WRK-TOTFUNC PIC 9(03)         VALUE ZEROES.                00109409
+       77 WRK-MEDIA      PIC 9(10)V99      VALUE ZEROES.                00109509
+       77 WRK-MEDIA-MASK PIC Z.ZZZ.ZZZ.ZZ9,99.                          00109609
+      *================================================================*00109800
+       PROCEDURE                                 DIVISION.              00109900
+      *================================================================*00110000
+           ACCEPT WRK-DADOS FROM SYSIN.                                 00110100
+           DISPLAY 'MES....................' WRK-MES.                   00110201
+           DISPLAY 'TOTAL DE VENDAS........' WRK-TOTVEND.               00110301
+           DISPLAY 'TOTAL DE FUNCIONARIOS..' WRK-TOTFUNC.               00110401
+             DIVIDE WRK-TOTVEND BY WRK-TOTFUNC GIVING WRK-MEDIA         00110504
+                ON SIZE ERROR                                           00110605
+                  DISPLAY 'ERRO NA DIVISAO'                             00110705
+                NOT ON SIZE ERROR                                       00110805
+                  MOVE WRK-MEDIA TO WRK-MEDIA-MASK                      00110909
+                  DISPLAY 'MEDIA................' WRK-MEDIA-MASK        00111009
+             END-DIVIDE.                                                00111105
+           STOP RUN.                                                    00112000
